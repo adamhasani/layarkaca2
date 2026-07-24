@@ -1,5 +1,5 @@
 import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "./firebase.ts";
 
 export interface WikipediaBlockbusterRecord {
   id: string;

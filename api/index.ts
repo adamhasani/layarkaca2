@@ -1,5 +1,6 @@
 process.env.VERCEL = '1';
-import { app } from '../server';
+
+const { app } = await import('../server.ts');
 
 export default app;
 

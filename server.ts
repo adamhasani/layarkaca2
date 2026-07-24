@@ -1,12 +1,12 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from './src/lib/firebase';
+import { db } from './src/lib/firebase.ts';
 import express from 'express';
 import path from 'path';
 import { Readable } from 'stream';
 import * as cheerio from 'cheerio';
-import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies";
-import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia";
-import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists";
+import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies.ts";
+import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia.ts";
+import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists.ts";
 export const app = express();
 app.get("/api/ping", (req, res) => res.json({ ok: true, msg: "pong" }));
 
