@@ -2538,7 +2538,8 @@ function isTitleMatch(queryTitle: string, targetTitle: string): boolean {
   // Vercel handles static files automatically.
   if (!process.env.VERCEL) {
     if (process.env.NODE_ENV !== 'production') {
-      import('vite').then(({ createServer: createViteServer }) => {
+      const vitePkg = 'vite';
+      import(vitePkg).then(({ createServer: createViteServer }) => {
         createViteServer({
           server: { middlewareMode: true },
           appType: 'spa',
