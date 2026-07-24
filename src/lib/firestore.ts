@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, getDoc, getDocs, query, where, deleteDoc, orderBy, serverTimestamp, limit } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from './firebase.ts';
 
 // Interfaces
 export interface WatchlistItem {

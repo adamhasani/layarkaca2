@@ -1,5 +1,5 @@
 import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "./firebase.ts";
 
 export function getCurrentMonthKey(): string {
   const d = new Date();

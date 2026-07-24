@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "api/**/*": {
-      "includeFiles": "firebase-applet-config.json"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
