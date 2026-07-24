@@ -8,6 +8,7 @@ import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/fires
 import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia";
 import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists";
 export const app = express();
+app.get("/api/ping", (req, res) => res.json({ ok: true, msg: "pong" }));
 
 const detailCache = new Map<string, any>();
 
