@@ -197,10 +197,7 @@ async function scrapeImdbKeywords(): Promise<{ latest: string[]; trending: strin
   return result;
 }
 
-export 
-
-  
-  const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Media Proxy route
   app.get('/api/proxy', async (req, res) => {
