@@ -2,7 +2,6 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './src/lib/firebase';
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import { Readable } from 'stream';
 import * as cheerio from 'cheerio';
 import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies";
@@ -289,6 +288,10 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
       const buffer = Buffer.from(arrayBuffer);
 
       if (buffer.length > 0) {
+        if (proxyImageCache.size > 200) {
+          const firstKey = proxyImageCache.keys().next().value;
+          if (firstKey) proxyImageCache.delete(firstKey);
+        }
         proxyImageCache.set(targetUrl, { buffer, contentType });
       }
 
@@ -2535,13 +2538,15 @@ function isTitleMatch(queryTitle: string, targetTitle: string): boolean {
   // Vercel handles static files automatically.
   if (!process.env.VERCEL) {
     if (process.env.NODE_ENV !== 'production') {
-      createViteServer({
-        server: { middlewareMode: true },
-        appType: 'spa',
-      }).then(vite => {
-        app.use(vite.middlewares);
-        app.listen(PORT, '0.0.0.0', () => {
-          console.log(`Server running on http://0.0.0.0:${PORT}`);
+      import('vite').then(({ createServer: createViteServer }) => {
+        createViteServer({
+          server: { middlewareMode: true },
+          appType: 'spa',
+        }).then(vite => {
+          app.use(vite.middlewares);
+          app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on http://0.0.0.0:${PORT}`);
+          });
         });
       });
     } else {
