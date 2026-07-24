@@ -1,0 +1,21 @@
+
+      const fetchSectionForQueries = async (queries: string[], genreFilter?: string) => {
+        const seenSlugs = new Set<string>();
+        const allResults: any[] = [];
+
+        const queryPromises = queries.map(async (query) => {
+          try {
+            const apiRes = await fetch(`https://www.keyrafara.com/search/idlix-search?query=${encodeURIComponent(query)}`);
+            const data = await apiRes.json();
+            if (data.status && data.result && Array.isArray(data.result.results)) {
+              return data.result.results.slice(0, 8);
+            }
+          } catch (e) {
+            console.error(`Error searching query ${query}:`, e);
+          }
+          return [];
+        });
+
+        const queryResultsArray = await Promise.all(queryPromises);
+        for (const items of queryResultsArray) {
+          for (const item of items) {

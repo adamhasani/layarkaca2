@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /watchlists/{document} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    match /history/{document} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    match /reviews/{document} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    
+    // Movie metadata and caching
+    match /movies/{document} {
+      allow read, write: if true;
+    }
+    match /wikipedia_metadata/{document} {
+      allow read, write: if true;
+    }
+    match /sync_metadata/{document} {
+      allow read, write: if true;
+    }
+    match /wikipedia_blockbusters/{document} {
+      allow read, write: if true;
+    }
+    match /netflix_trending/{document} {
+      allow read, write: if true;
+    }
+    match /indonesian_trending/{document} {
+      allow read, write: if true;
+    }
+    match /wikipedia_trending_popular/{document} {
+      allow read, write: if true;
+    }
+    match /wikipedia_animated_movies/{document} {
+      allow read, write: if true;
+    }
+    match /system/{document} {
+      allow read, write: if true;
+    }
+  }
+}

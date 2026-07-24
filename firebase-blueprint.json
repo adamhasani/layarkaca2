@@ -1,0 +1,34 @@
+{
+  "collections": [
+    {
+      "name": "watchlists",
+      "description": "User's saved movies/series for later viewing.",
+      "securityRules": {
+        "read": "auth != null && auth.uid == resource.data.userId",
+        "create": "auth != null && request.resource.data.userId == auth.uid",
+        "update": "auth != null && auth.uid == resource.data.userId && request.resource.data.userId == auth.uid",
+        "delete": "auth != null && auth.uid == resource.data.userId"
+      }
+    },
+    {
+      "name": "history",
+      "description": "User's viewing history to continue watching later.",
+      "securityRules": {
+        "read": "auth != null && auth.uid == resource.data.userId",
+        "create": "auth != null && request.resource.data.userId == auth.uid",
+        "update": "auth != null && auth.uid == resource.data.userId && request.resource.data.userId == auth.uid",
+        "delete": "auth != null && auth.uid == resource.data.userId"
+      }
+    },
+    {
+      "name": "reviews",
+      "description": "User reviews for movies and series.",
+      "securityRules": {
+        "read": "true",
+        "create": "auth != null && request.resource.data.userId == auth.uid",
+        "update": "auth != null && auth.uid == resource.data.userId && request.resource.data.userId == auth.uid",
+        "delete": "auth != null && auth.uid == resource.data.userId"
+      }
+    }
+  ]
+}

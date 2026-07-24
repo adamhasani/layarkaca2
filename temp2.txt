@@ -1,0 +1,39 @@
+      const seenSlugs = new Set<string>();
+
+      for (const term of searchTerms) {
+        try {
+          const apiRes = await fetch(`https://www.keyrafara.com/search/idlix-search?query=${encodeURIComponent(term)}`);
+          const data = await apiRes.json();
+          if (data.status && data.result && Array.isArray(data.result.results)) {
+            for (const item of data.result.results) {
+              if (item.slug && !seenSlugs.has(item.slug)) {
+                seenSlugs.add(item.slug);
+                allResults.push(item);
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      const enrichedResults = await Promise.all(
+        allResults
+          .filter((item: any) => item && item.title && !item.title.toLowerCase().includes('dialihkan'))
+          .slice(0, 12)
+          .map(async (item: any) => {
+            const poster = await resolvePosterUrl(item);
+            try {
+              if (item.slug) {
+                const detailRes = await fetch(`https://www.keyrafara.com/search/idlix-detail?slug=${encodeURIComponent(item.slug)}`);
+                const detailData = await detailRes.json();
+                if (detailData.status && detailData.result) {
+                  return {
+                    ...item,
+                    poster: poster,
+                    rating: detailData.result.rating || '8.0',
+                    genres: detailData.result.genres || [],
+                    synopsis: detailData.result.overview || detailData.result.synopsis,
+                    quality: detailData.result.quality,
+                    duration: detailData.result.runtime ? `${detailData.result.runtime}m` : detailData.result.duration
+                  };
+                }
+              }

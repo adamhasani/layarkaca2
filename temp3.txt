@@ -1,0 +1,19 @@
+
+      // Removed AI search fallback based on user request
+
+      const enrichedResults = await Promise.all(
+        items
+          .filter((item: any) => item && item.title && !item.title.toLowerCase().includes('dialihkan'))
+          .slice(0, 16)
+          .map(async (item: any) => {
+            const detailData = item.slug ? await fetchMovieDetail(item.slug) : null;
+            const poster = await resolvePosterUrl(detailData || item);
+            return {
+              ...item,
+              poster: poster,
+              rating: detailData?.rating || '8.0',
+              genres: detailData?.genres && detailData.genres.length > 0 ? detailData.genres : ['Action', 'Drama'],
+              synopsis: detailData?.overview || detailData?.synopsis || `Saksikan film ${item.title} sub Indo gratis di IDLIX.`,
+              quality: detailData?.quality || 'HD',
+              duration: detailData?.runtime ? `${detailData.runtime}m` : detailData?.duration || '1h 50m'
+            };
