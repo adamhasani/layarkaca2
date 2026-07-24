@@ -1,12 +1,12 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from './src/lib/firebase.ts';
+import { db } from './src/lib/firebase';
 import express from 'express';
 import path from 'path';
 import { Readable } from 'stream';
 import * as cheerio from 'cheerio';
-import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies.ts";
-import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia.ts";
-import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists.ts";
+import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies";
+import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia";
+import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists";
 export const app = express();
 app.get("/api/ping", (req, res) => res.json({ ok: true, msg: "pong" }));
 
@@ -2537,7 +2537,8 @@ function isTitleMatch(queryTitle: string, targetTitle: string): boolean {
   
   // Vercel Serverless handling: don't start the server or serve static files
   // Vercel handles static files automatically.
-  if (!process.env.VERCEL) {
+  const isVercelEnv = Boolean(process.env.VERCEL || process.env.VERCEL_ENV || process.env.NOW_REGION);
+  if (!isVercelEnv) {
     if (process.env.NODE_ENV !== 'production') {
       const vitePkg = 'vite';
       import(vitePkg).then(({ createServer: createViteServer }) => {
