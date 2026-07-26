@@ -1,4 +1,4 @@
-import { X, Settings, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard } from 'lucide-react';
+import { X, Settings, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
@@ -28,6 +28,30 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
   const [subFontSize, setSubFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
   const [activeSettingsTab, setActiveSettingsTab] = useState<'server' | 'quality' | 'subtitle'>('quality');
+
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleShare = async () => {
+    if (!detailedMovie) return;
+    const shareUrl = `${window.location.origin}/?movie=${encodeURIComponent(detailedMovie.id)}&title=${encodeURIComponent(detailedMovie.title)}&year=${detailedMovie.year || ''}&type=${detailedMovie.type || ''}&poster=${encodeURIComponent(detailedMovie.posterUrl || '')}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: detailedMovie.title,
+          text: `Tonton ${detailedMovie.title} di LayarZona`,
+          url: shareUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      }
+    } catch (err) {
+      console.log('Share failed:', err);
+    }
+  };
+
 
   // Series Season & Episode states
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
@@ -345,6 +369,16 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
 
             <div className="flex items-center gap-2 pointer-events-auto shrink-0">
               {/* Single Unified Pengaturan Button */}
+              {/* Share Action */}
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full backdrop-blur-md transition-colors text-xs sm:text-sm font-semibold border bg-black/60 hover:bg-white/10 text-white border-white/20 hover:border-transparent"
+                title="Bagikan Film"
+              >
+                {isCopied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
+                <span className="hidden sm:inline">{isCopied ? "Tersalin!" : "Share"}</span>
+              </button>
+              
               {/* Watchlist Quick Action */}
               <button
                 onClick={handleToggleWatchlist}

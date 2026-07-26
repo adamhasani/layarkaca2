@@ -351,6 +351,31 @@ export default function App() {
 
   useEffect(() => {
     loadHomeMovies();
+
+    // Check for shared movie in URL
+    const params = new URLSearchParams(window.location.search);
+    const sharedMovieSlug = params.get('movie');
+    if (sharedMovieSlug) {
+      setActiveMovie({
+        id: sharedMovieSlug,
+        title: params.get('title') || 'Loading...',
+        description: 'Menyiapkan film...',
+        type: (params.get('type') as any) === 'series' ? 'series' : 'movie',
+        categories: [],
+        rating: 0,
+        year: parseInt(params.get('year') || '0') || new Date().getFullYear(),
+        duration: '',
+        posterUrl: params.get('poster') || '',
+        bannerUrl: params.get('poster') || '',
+        subtitles: [],
+        reviews: [],
+        match: 99,
+        streamUrl: '',
+        embedUrl: ''
+      });
+      // Clean up URL without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const fetchUserData = () => {
