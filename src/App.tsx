@@ -110,11 +110,11 @@ export default function App() {
   const [actionMovies, setActionMovies] = useState<Movie[]>([]);
   const [horrorMovies, setHorrorMovies] = useState<Movie[]>([]);
   const [comedyMovies, setComedyMovies] = useState<Movie[]>([]);
-  const [wikiComedyMovies, setWikiComedyMovies] = useState<Movie[]>(wikipediaComedyDramaMovies);
-  const [indoTrendingMovies, setIndoTrendingMovies] = useState<Movie[]>(indonesianTopMovies);
-  const [wikiBlockbusterMovies, setWikiBlockbusterMovies] = useState<Movie[]>(wikipediaBlockbusters);
-  const [wikiAnimatedMovies, setWikiAnimatedMovies] = useState<Movie[]>(wikipediaAnimatedMovies);
-  const [wikiTrendingPopularMovies, setWikiTrendingPopularMovies] = useState<Movie[]>(wikipediaTrendingPopularMovies);
+  const [wikiComedyMovies, setWikiComedyMovies] = useState<Movie[]>([]);
+  const [indoTrendingMovies, setIndoTrendingMovies] = useState<Movie[]>([]);
+  const [wikiBlockbusterMovies, setWikiBlockbusterMovies] = useState<Movie[]>([]);
+  const [wikiAnimatedMovies, setWikiAnimatedMovies] = useState<Movie[]>([]);
+  const [wikiTrendingPopularMovies, setWikiTrendingPopularMovies] = useState<Movie[]>([]);
   const [isLoadingHome, setIsLoadingHome] = useState(true);
   const { user } = useAuth();
   const [watchlistMovies, setWatchlistMovies] = useState<Movie[]>([]);
@@ -590,7 +590,15 @@ export default function App() {
           </div>
         ) : (
           <>
-            <FeaturedHero movies={latestMovies.length > 0 ? latestMovies.slice(0, 5) : (trendingMovies.length > 0 ? trendingMovies.slice(0, 5) : [...mockMovies].sort((a, b) => (b.year || 0) - (a.year || 0)).slice(0, 5))} onPlay={setActiveMovie} />
+            {isLoadingHome ? (
+              <div className="pt-32 pb-64 flex flex-col items-center justify-center space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600/80"></div>
+                <p className="text-zinc-500 font-medium">Memuat data film...</p>
+              </div>
+            ) : (
+              <>
+                <FeaturedHero movies={latestMovies.length > 0 ? latestMovies.slice(0, 5) : (trendingMovies.length > 0 ? trendingMovies.slice(0, 5) : [...mockMovies].sort((a, b) => (b.year || 0) - (a.year || 0)).slice(0, 5))} onPlay={setActiveMovie} />
+
             {user && historyMovies.length > 0 && (
               <div id="section-history" className="pt-8">
                 <MovieGrid 
@@ -732,6 +740,8 @@ export default function App() {
                   onPlay={setActiveMovie}
                 />
               </div>
+            )}
+              </>
             )}
           </>
         )}

@@ -569,7 +569,7 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
       // 1. First check Firebase Firestore for saved monthly Indonesian top movies
       const firestoreData = await fetchMonthlyCollectionFromFirestore('indonesian_trending');
-      if (firestoreData.items && firestoreData.items.length >= 5 && false) {
+      if (firestoreData.items && firestoreData.items.length >= 5) {
         return res.json({
           status: true,
           source: 'firebase_firestore_monthly',
@@ -1500,7 +1500,7 @@ function getRealMovieMetaData(rawTitle: string): { rating: string; duration: str
 
       // 1. First check Firebase Firestore for saved monthly Netflix top movies
       const firestoreData = await fetchMonthlyCollectionFromFirestore('netflix_trending');
-      if (firestoreData.items && firestoreData.items.length >= 5 && false) {
+      if (firestoreData.items && firestoreData.items.length >= 5) {
         return res.json({
           status: true,
           source: 'firebase_firestore_monthly',
