@@ -110,7 +110,7 @@ export default function App() {
   const [actionMovies, setActionMovies] = useState<Movie[]>([]);
   const [horrorMovies, setHorrorMovies] = useState<Movie[]>([]);
   const [comedyMovies, setComedyMovies] = useState<Movie[]>([]);
-  const [wikiComedyMovies, setWikiComedyMovies] = useState<Movie[]>([]);
+  const [wikiComedyMovies, setWikiComedyMovies] = useState<Movie[]>(wikipediaComedyDramaMovies);
   const [indoTrendingMovies, setIndoTrendingMovies] = useState<Movie[]>([]);
   const [wikiBlockbusterMovies, setWikiBlockbusterMovies] = useState<Movie[]>([]);
   const [wikiAnimatedMovies, setWikiAnimatedMovies] = useState<Movie[]>([]);
