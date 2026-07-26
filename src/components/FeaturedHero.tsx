@@ -47,7 +47,7 @@ export function FeaturedHero({ movies, onPlay }: FeaturedHeroProps) {
 
   const rawBanner = (movie.bannerUrl && !movie.bannerUrl.includes('unsplash.com')) 
     ? movie.bannerUrl 
-    : (movie.posterUrl || 'https://upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg');
+    : (movie.posterUrl || 'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg');
 
   // Upgrade TMDB image quality if using w500
   const highQualityBanner = typeof rawBanner === 'string' ? rawBanner.replace('/w500/', '/original/') : rawBanner;

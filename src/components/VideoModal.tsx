@@ -621,7 +621,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
             ) : isDetailLoading ? (
               <>
                 <img 
-                  src={typeof detailedMovie.bannerUrl === 'string' ? detailedMovie.bannerUrl.replace('/w500/', '/original/') : (detailedMovie.posterUrl || 'https://upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg')} 
+                  src={typeof detailedMovie.bannerUrl === 'string' ? detailedMovie.bannerUrl.replace('/w500/', '/original/') : (detailedMovie.posterUrl || 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2TGbiU05v.jpg')} 
                   alt={detailedMovie.title} 
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover opacity-30 blur-sm scale-105"
@@ -647,7 +647,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
             ) : (
               <>
                 <img 
-                  src={typeof detailedMovie.bannerUrl === 'string' ? detailedMovie.bannerUrl.replace('/w500/', '/original/') : (detailedMovie.bannerUrl || detailedMovie.posterUrl || 'https://upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg')} 
+                  src={typeof detailedMovie.bannerUrl === 'string' ? detailedMovie.bannerUrl.replace('/w500/', '/original/') : (detailedMovie.bannerUrl || detailedMovie.posterUrl || 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2TGbiU05v.jpg')} 
                   alt="Video Poster" 
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover opacity-40 blur-xs scale-105"
