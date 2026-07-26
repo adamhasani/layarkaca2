@@ -651,6 +651,9 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                     <span className="text-xs sm:text-sm text-zinc-400">
                       Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : 'IDLIX, Strigil, Moviebox, Videasy & LK21'}...
                     </span>
+                    <span className="text-[11px] sm:text-xs text-zinc-500 mt-2 text-center max-w-[250px] sm:max-w-xs">
+                      Jika film tidak berjalan atau terganggu (buffering), Anda bisa memilih server lain di bawah pemutar ini.
+                    </span>
                   </div>
                 </div>
               </>
@@ -804,6 +807,12 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                 );
               })}
             </div>
+          </div>
+
+          <div className="px-6 py-2 bg-white/[0.02] border-b border-white/5 flex items-center justify-center text-center">
+            <span className="text-[11px] sm:text-xs text-zinc-400">
+              💡 <strong className="text-zinc-300 font-medium">Tips:</strong> Jika film tidak berjalan atau terganggu (buffering), silakan pilih server lain.
+            </span>
           </div>
           
           {/* Multi-Source VIP Embed Switcher */}
