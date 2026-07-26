@@ -7,7 +7,8 @@ import { FeaturedHero } from './components/FeaturedHero';
 import { MovieGrid } from './components/MovieGrid';
 import { VideoModal } from './components/VideoModal';
 import { Footer } from './components/Footer';
-import { mockMovies, categories, wikipediaBlockbusters, wikipediaAnimatedMovies, wikipediaTrendingPopularMovies, indonesianTopMovies } from './data';
+import { mockMovies, categories, wikipediaBlockbusters, wikipediaAnimatedMovies, wikipediaTrendingPopularMovies,
+  wikipediaComedyDramaMovies, indonesianTopMovies } from './data';
 import { Movie, Notification } from './types';
 
 const realMovieMetaDataMap: Record<string, { rating: number; duration: string }> = {
@@ -109,6 +110,7 @@ export default function App() {
   const [actionMovies, setActionMovies] = useState<Movie[]>([]);
   const [horrorMovies, setHorrorMovies] = useState<Movie[]>([]);
   const [comedyMovies, setComedyMovies] = useState<Movie[]>([]);
+  const [wikiComedyMovies, setWikiComedyMovies] = useState<Movie[]>(wikipediaComedyDramaMovies);
   const [indoTrendingMovies, setIndoTrendingMovies] = useState<Movie[]>(indonesianTopMovies);
   const [wikiBlockbusterMovies, setWikiBlockbusterMovies] = useState<Movie[]>(wikipediaBlockbusters);
   const [wikiAnimatedMovies, setWikiAnimatedMovies] = useState<Movie[]>(wikipediaAnimatedMovies);
@@ -457,11 +459,11 @@ export default function App() {
   // Combine all home section movies for smart category filtering & cache
   const allHomeMovies = useMemo(() => {
     const map = new Map<string, Movie>();
-    [...wikiTrendingPopularMovies, ...latestMovies, ...trendingMovies, ...actionMovies, ...horrorMovies, ...comedyMovies, ...indoTrendingMovies, ...wikiBlockbusterMovies, ...wikiAnimatedMovies].forEach(m => {
+    [...wikiTrendingPopularMovies, ...latestMovies, ...trendingMovies, ...actionMovies, ...horrorMovies, ...comedyMovies, ...wikiComedyMovies, ...indoTrendingMovies, ...wikiBlockbusterMovies, ...wikiAnimatedMovies].forEach(m => {
       if (m && m.id) map.set(m.id, m);
     });
     return Array.from(map.values()).sort((a, b) => (b.year || 0) - (a.year || 0));
-  }, [wikiTrendingPopularMovies, latestMovies, trendingMovies, actionMovies, horrorMovies, comedyMovies, indoTrendingMovies, wikiBlockbusterMovies, wikiAnimatedMovies]);
+  }, [wikiTrendingPopularMovies, latestMovies, trendingMovies, actionMovies, horrorMovies, comedyMovies, wikiComedyMovies, indoTrendingMovies, wikiBlockbusterMovies, wikiAnimatedMovies]);
 
   const handleSelectCategory = (id: string | null) => {
     setSelectedCategory(id);
@@ -719,11 +721,11 @@ export default function App() {
             )}
 
             {/* Section 5: Komedi & Drama */}
-            {comedyMovies.length > 0 && (
+            {wikiComedyMovies.length > 0 && (
               <div id="section-comedy">
                 <MovieGrid 
                   title="🎭 Film Komedi & Drama Populer"
-                  movies={comedyMovies}
+                  movies={wikiComedyMovies}
                   categories={[]}
                   selectedCategory={null}
                   onSelectCategory={() => {}}
