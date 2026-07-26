@@ -1,5 +1,5 @@
 import { collection, getDocs, doc, setDoc } from "firebase/firestore";
-import { db } from "./firebase.ts";
+import { db } from "./firebase";
 
 export interface MovieRecord {
   id?: string;

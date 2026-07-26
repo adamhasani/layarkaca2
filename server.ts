@@ -1,12 +1,12 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from './src/lib/firebase.ts';
+import { db } from './src/lib/firebase';
 import express from 'express';
 import path from 'path';
 import { Readable } from 'stream';
 import * as cheerio from 'cheerio';
-import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies.ts";
-import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia.ts";
-import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists.ts";
+import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies";
+import { fetchWikipediaFromFirestore, saveWikipediaToFirestore, getCurrentMonthKey } from "./src/lib/firestoreWikipedia";
+import { fetchMonthlyCollectionFromFirestore, saveMonthlyCollectionToFirestore } from "./src/lib/firestoreMonthlyLists";
 export const app = express();
 app.get("/api/ping", (req, res) => res.json({ ok: true, msg: "pong" }));
 
@@ -256,6 +256,7 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
       }
 
       const response = await fetch(targetUrl, {
+        signal: AbortSignal.timeout(8000),
         headers: {
           'User-Agent': 'CineStreamApp/1.0 (https://cinestream.app; contact@cinestream.app) Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/123.0.0.0',
           'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'

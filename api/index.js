@@ -3,7 +3,7 @@ const require = createRequire(import.meta.url);
 
 process.env.VERCEL = '1';
 
-let appInstance: any = null;
+let appInstance = null;
 
 function getApp() {
   if (appInstance) return appInstance;
@@ -22,11 +22,11 @@ function getApp() {
   return appInstance;
 }
 
-export default function handler(req: any, res: any) {
+export default function handler(req, res) {
   try {
     const app = getApp();
     return app(req, res);
-  } catch (err: any) {
+  } catch (err) {
     return res.status(500).json({
       error: 'Vercel Serverless Exception',
       message: err?.message || String(err),
