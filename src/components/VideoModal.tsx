@@ -280,6 +280,15 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
 
   // Simulate network speed detection
   useEffect(() => {
+    if (detailedMovie?.embedUrl) {
+      const timer = setTimeout(() => {
+        setIsVideoLoading(false);
+      }, 5000); // safety fallback
+      return () => clearTimeout(timer);
+    }
+  }, [detailedMovie?.embedUrl]);
+
+  useEffect(() => {
     if (detailedMovie) {
       const speeds = ['Excellent', 'Good', 'Fair'];
       setConnSpeed(speeds[Math.floor(Math.random() * speeds.length)]);
@@ -607,6 +616,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
             ) : detailedMovie.embedUrl ? (
               <>
                 <iframe 
+                  key={detailedMovie.embedUrl}
                   src={detailedMovie.embedUrl} 
                   className="w-full h-full border-0 absolute top-0 left-0 z-10"
                   allowFullScreen
