@@ -41,7 +41,7 @@ const posterCache = new Map<string, string>();
 const getTmdbApiKey = (): string => {
   const envKey = process.env.TMDB_API_KEY;
   if (!envKey || envKey === 'YOUR_TMDB_API_KEY' || envKey.trim() === '') {
-    return 'b2a4729f27306f85ff87e79c09939f8d'; // Working community fallback key
+    return '15d2ea6d0dc1d476efbca3eba2b9bbfb'; // Working community fallback key
   }
   return envKey;
 };

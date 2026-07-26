@@ -1,5 +1,5 @@
 import fs from 'fs';
-const apiKey = 'b2a4729f27306f85ff87e79c09939f8d';
+const apiKey = '15d2ea6d0dc1d476efbca3eba2b9bbfb';
 
 async function replaceInFile(path, query) {
   let content = fs.readFileSync(path, 'utf8');
