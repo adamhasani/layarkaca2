@@ -11,6 +11,7 @@ interface FeaturedHeroProps {
 function getProxiedImageUrl(url?: string): string {
   if (!url || typeof url !== 'string' || !url.startsWith('http')) return '';
   if (url.startsWith('/api/') || url.startsWith('data:')) return url;
+  if (url.includes('tmdb.org')) return url; // TMDB images do not need proxying
   return `/api/image-proxy?url=${encodeURIComponent(url)}`;
 }
 
