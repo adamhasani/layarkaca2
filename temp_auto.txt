@@ -1,0 +1,143 @@
+      // 3. Try IDLIX first (for server='idlix' or server='auto')
+      if (requestedServer === 'idlix' || requestedServer === 'auto') {
+        const endpoint = isTvSeries ? '/streaming/idlix-series' : '/streaming/idlix';
+        const sNum = season ? String(season) : '1';
+        const eNum = episode ? String(episode) : '1';
+        const seriesParams = isTvSeries ? `&season=${sNum}&episode=${eNum}` : '';
+
+        // Try direct slug if provided
+        if (targetSlug && targetSlug.includes('-')) {
+          try {
+            const directRes = await fetch(`https://www.keyrafara.com${endpoint}?slug=${encodeURIComponent(targetSlug)}&server=auto${seriesParams}`);
+            const directData = await directRes.json();
+            if (
+              directData.status && 
+              directData.result && 
+              (directData.result.streamUrl || directData.result.embedUrl) &&
+              isTitleMatch(cleanQuery, directData.result.title)
+            ) {
+              try {
+                const detailMeta = await fetchMovieDetail(targetSlug);
+                if (detailMeta) {
+                  if (!directData.result.detail) directData.result.detail = {};
+                  directData.result.detail.cast = detailMeta.cast || [];
+                  directData.result.detail.director = detailMeta.director || '';
+                  directData.result.detail.tagline = detailMeta.tagline || '';
+                  directData.result.detail.releaseDate = detailMeta.releaseDate || '';
+                }
+              } catch (e) {
+                console.error('Error fetching detail meta:', e);
+              }
+              if (isTvSeries && seasonsData.length > 0) {
+                directData.result.seasons = seasonsData;
+              }
+              const finalData = { ...directData, server: 'IDLIX' };
+              detailCache.set(cacheKey, finalData);
+              return res.json(finalData);
+            }
+          } catch (e) {}
+        }
+
+        // Search IDLIX
+        try {
+          const searchRes = await fetch(`https://www.keyrafara.com/search/idlix-search?query=${encodeURIComponent(cleanQuery)}`);
+          const searchData = await searchRes.json();
+
+          if (searchData.status && searchData.result && Array.isArray(searchData.result.results) && searchData.result.results.length > 0) {
+            const results: any[] = searchData.result.results;
+            const titleMatches = results.filter(item => isTitleMatch(cleanQuery, item.title));
+
+            if (titleMatches.length > 0) {
+              let bestMatch = titleMatches[0];
+              if (year) {
+                let minDiff = Infinity;
+                for (const item of titleMatches) {
+                  const itemYear = item.year || (item.slug?.match(/\d{4}/) ? parseInt(item.slug.match(/\d{4}/)[0]) : null);
+                  if (itemYear) {
+                    const diff = Math.abs(parseInt(year as string) - parseInt(itemYear));
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      bestMatch = item;
+                    }
+                  }
+                }
+              }
+
+              if (bestMatch && bestMatch.slug) {
+                const matchedRes = await fetch(`https://www.keyrafara.com${endpoint}?slug=${encodeURIComponent(bestMatch.slug)}&server=auto${seriesParams}`);
+                const matchedData = await matchedRes.json();
+                if (
+                  matchedData.status && 
+                  matchedData.result && 
+                  (matchedData.result.streamUrl || matchedData.result.embedUrl) &&
+                  isTitleMatch(cleanQuery, matchedData.result.title)
+                ) {
+                  try {
+                    const detailMeta = await fetchMovieDetail(bestMatch.slug);
+                    if (detailMeta) {
+                      if (!matchedData.result.detail) matchedData.result.detail = {};
+                      matchedData.result.detail.cast = detailMeta.cast || [];
+                      matchedData.result.detail.director = detailMeta.director || '';
+                      matchedData.result.detail.tagline = detailMeta.tagline || '';
+                      matchedData.result.detail.releaseDate = detailMeta.releaseDate || '';
+                    }
+                  } catch (e) {
+                    console.error('Error fetching detail meta for matched slug:', e);
+                  }
+                  if (isTvSeries && seasonsData.length > 0) {
+                    matchedData.result.seasons = seasonsData;
+                  }
+                  const finalData = { ...matchedData, server: 'IDLIX' };
+                  detailCache.set(cacheKey, finalData);
+                  return res.json(finalData);
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Match search error:', err);
+        }
+      }
+
+      // 4. Fallback to Strigil in 'auto' mode if IDLIX didn't return stream
+      if (requestedServer === 'auto') {
+        const strigilResult = await fetchStrigil();
+        if (strigilResult) {
+          detailCache.set(cacheKey, strigilResult);
+          return res.json(strigilResult);
+        }
+      }
+
+      // 5. Fallback to Moviebox in 'auto' mode if both IDLIX & Strigil failed
+      if (requestedServer === 'auto') {
+        const mbResult = await fetchMoviebox(cleanQuery);
+        if (mbResult) {
+          detailCache.set(cacheKey, mbResult);
+          return res.json(mbResult);
+        }
+      }
+
+      // 5.5. Fallback to Videasy in 'auto' mode if others failed
+      if (requestedServer === 'auto') {
+        const videasyResult = await fetchVideasy();
+        if (videasyResult) {
+          detailCache.set(cacheKey, videasyResult);
+          return res.json(videasyResult);
+        }
+      }
+      // 5.7. Fallback to LK21 in 'auto' mode if others failed
+      if (requestedServer === 'auto') {
+        const lk21Result = await fetchLk21(cleanQuery);
+        if (lk21Result) {
+          detailCache.set(cacheKey, lk21Result);
+          return res.json(lk21Result);
+        }
+      }
+
+      // No server had match
+      const noMatchResult = { status: false, message: `Film '${query}' (${year || ''}) belum tersedia di server IDLIX, Strigil, Moviebox, maupun Videasy.` };
+      detailCache.set(cacheKey, noMatchResult);
+      res.json(noMatchResult);
+    } catch (err) {
+      console.error('Proxy error:', err);
+      res.status(500).json({ error: 'Failed to fetch from external API' });

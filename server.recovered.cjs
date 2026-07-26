@@ -2695,7 +2695,7 @@ app.get("/api/detail", async (req, res) => {
       };
       return res.json(failLk21);
     }
-    const fetchIdlixWrapper = async () => {
+    if (requestedServer === "idlix" || requestedServer === "auto") {
       const endpoint = isTvSeries
         ? "/streaming/idlix-series"
         : "/streaming/idlix";
@@ -2731,8 +2731,8 @@ app.get("/api/detail", async (req, res) => {
               directData.result.seasons = seasonsData;
             }
             const finalData = { ...directData, server: "IDLIX" };
-            
-            return finalData;
+            detailCache.set(cacheKey, finalData);
+            return res.json(finalData);
           }
         } catch (e) {}
       }
@@ -2804,8 +2804,8 @@ app.get("/api/detail", async (req, res) => {
                   matchedData.result.seasons = seasonsData;
                 }
                 const finalData = { ...matchedData, server: "IDLIX" };
-                
-                return finalData;
+                detailCache.set(cacheKey, finalData);
+                return res.json(finalData);
               }
             }
           }
@@ -2813,36 +2813,36 @@ app.get("/api/detail", async (req, res) => {
       } catch (err) {
         console.error("Match search error:", err);
       }
-      return null;
-    };
-
-    if (requestedServer === "idlix") {
-      const idlixRes = await fetchIdlixWrapper();
-      if (idlixRes) {
-        detailCache.set(cacheKey, idlixRes);
-        return res.json(idlixRes);
-      }
-      return res.json({ status: false, message: 'Not found in IDLIX' });
     }
-
     if (requestedServer === "auto") {
-      try {
-        const fastestResult = await Promise.any([
-          fetchIdlixWrapper().then(r => r ? r : Promise.reject()),
-          fetchStrigil().then(r => r ? r : Promise.reject()),
-          fetchMoviebox(cleanQuery).then(r => r ? r : Promise.reject()),
-          fetchVideasy().then(r => r ? r : Promise.reject()),
-          fetchLk21(cleanQuery).then(r => r ? r : Promise.reject())
-        ]);
-        detailCache.set(cacheKey, fastestResult);
-        return res.json(fastestResult);
-      } catch (e) {
-        const noMatchResult = { status: false, message: `Film '${query}' (${year || ''}) belum tersedia di server manapun.` };
-        detailCache.set(cacheKey, noMatchResult);
-        return res.json(noMatchResult);
+      const strigilResult = await fetchStrigil();
+      if (strigilResult) {
+        detailCache.set(cacheKey, strigilResult);
+        return res.json(strigilResult);
       }
     }
-const noMatchResult = {
+    if (requestedServer === "auto") {
+      const mbResult = await fetchMoviebox(cleanQuery);
+      if (mbResult) {
+        detailCache.set(cacheKey, mbResult);
+        return res.json(mbResult);
+      }
+    }
+    if (requestedServer === "auto") {
+      const videasyResult = await fetchVideasy();
+      if (videasyResult) {
+        detailCache.set(cacheKey, videasyResult);
+        return res.json(videasyResult);
+      }
+    }
+    if (requestedServer === "auto") {
+      const lk21Result = await fetchLk21(cleanQuery);
+      if (lk21Result) {
+        detailCache.set(cacheKey, lk21Result);
+        return res.json(lk21Result);
+      }
+    }
+    const noMatchResult = {
       status: false,
       message: `Film '${query}' (${year || ""}) belum tersedia di server IDLIX, Strigil, Moviebox, maupun Videasy.`,
     };
