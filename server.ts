@@ -2,6 +2,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './src/lib/firebase';
 import express from 'express';
 import path from 'path';
+import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 import * as cheerio from 'cheerio';
 import { fetchMoviesFromFirestore, seedMoviesToFirestore } from "./src/lib/firestoreMovies";
@@ -256,7 +257,6 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
       }
 
       const response = await fetch(targetUrl, {
-        signal: AbortSignal.timeout(8000),
         headers: {
           'User-Agent': 'CineStreamApp/1.0 (https://cinestream.app; contact@cinestream.app) Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/123.0.0.0',
           'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
@@ -301,14 +301,11 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
       res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.send(buffer);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Image proxy error:', err);
-      const darkSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
-        <rect width="600" height="900" fill="#0f172a"/>
-        <text x="300" y="450" font-family="sans-serif" font-size="28" font-weight="bold" fill="#f8fafc" text-anchor="middle">CineStream</text>
-      </svg>`;
-      res.setHeader('Content-Type', 'image/svg+xml');
-      res.send(Buffer.from(darkSvg));
+      // Fallback SVG or JSON error
+      // Return JSON to debug the error in Vercel logs instead of masking it with SVG
+      res.status(500).json({ error: 'Image proxy error', details: err?.message, stack: err?.stack });
     }
   });
 
