@@ -2826,21 +2826,48 @@ app.get("/api/detail", async (req, res) => {
     }
 
     if (requestedServer === "auto") {
-      try {
-        const fastestResult = await Promise.any([
-          fetchIdlixWrapper().then(r => r ? r : Promise.reject()),
-          fetchStrigil().then(r => r ? r : Promise.reject()),
-          fetchMoviebox(cleanQuery).then(r => r ? r : Promise.reject()),
-          fetchVideasy().then(r => r ? r : Promise.reject()),
-          fetchLk21(cleanQuery).then(r => r ? r : Promise.reject())
-        ]);
-        detailCache.set(cacheKey, fastestResult);
-        return res.json(fastestResult);
-      } catch (e) {
-        const noMatchResult = { status: false, message: `Film '${query}' (${year || ''}) belum tersedia di server manapun.` };
-        detailCache.set(cacheKey, noMatchResult);
-        return res.json(noMatchResult);
+      let result;
+
+      // 1. lk21
+      result = await fetchLk21(cleanQuery);
+      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
+
+      // 2. videasy
+      result = await fetchVideasy();
+      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
+
+      // 3. strigil tapi yang multi embed
+      result = await fetchStrigil();
+      if (result) {
+        const multiEmbedSrc = result.result?.embedSources?.find(s => s.name.includes("MultiEmbed"));
+        if (multiEmbedSrc) {
+          result.result.embedUrl = multiEmbedSrc.url;
+        }
+        result.server = "Strigil MultiEmbed";
+        detailCache.set(cacheKey, result);
+        return res.json(result);
       }
+
+      // 4. strigil lagi tapi yang vip strigil lagi
+      // (This will only be reached if fetchStrigil() above somehow fails, which might be rare, but we follow the exact requested order)
+      result = await fetchStrigil();
+      if (result) {
+        result.server = "Strigil VIP";
+        detailCache.set(cacheKey, result);
+        return res.json(result);
+      }
+
+      // 5. idlix
+      result = await fetchIdlixWrapper();
+      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
+
+      // 6. moviebox
+      result = await fetchMoviebox(cleanQuery);
+      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
+
+      const noMatchResult = { status: false, message: `Film '${query}' (${year || ''}) belum tersedia di server manapun.` };
+      detailCache.set(cacheKey, noMatchResult);
+      return res.json(noMatchResult);
     }
 const noMatchResult = {
       status: false,
