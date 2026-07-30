@@ -240,7 +240,7 @@ async function scrapeImdbKeywords() {
   return result;
 }
 __name(scrapeImdbKeywords, "scrapeImdbKeywords");
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
+const PORT = 3000;
 app.get("/api/proxy", async (req, res) => {
   try {
     const targetUrl = req.query.url as string;
@@ -677,8 +677,8 @@ app.get("/api/indonesian-trending", async (req, res) => {
             .text()
             .trim()
             .replace(/[\.\s]/g, "");
-          const yearStr = $(tds[3]).text().trim();
-          const director = $(tds[4]).text().trim();
+          const yearStr = $(tds[4]).text().trim();
+          const director = $(tds[5]).text().trim();
           const cleanTitle = title.replace(/\(film.*?\)/gi, "").trim();
           if (cleanTitle) {
             let wikiUrl = "";
@@ -706,7 +706,8 @@ app.get("/api/indonesian-trending", async (req, res) => {
     const verifiedIndoPosters = {
       "agak laen": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/3/30/Poster_film_Agak_Laen.jpg",
+          "https://image.tmdb.org/t/p/w500/lUOwyPbDD9Agl3pHQVHGbZE0TvI.jpg",
+        tmdbId: 1175161,
         synopsis:
           "Empat sekawan penjaga rumah hantu di pasar malam berusaha mencari cara baru untuk menakuti pengunjung demi menyelamatkan usaha mereka, namun situasi menjadi kacau ketika seorang pengunjung tewas di dalam wahana.",
         rating: "8.1",
@@ -715,7 +716,8 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "agak laen: menyala pantiku!": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/3/30/Poster_film_Agak_Laen.jpg",
+          "https://image.tmdb.org/t/p/w500/fPJ9OjLgAQoLZrPeL6ZfQwNkfPK.jpg",
+        tmdbId: 1287571,
         synopsis:
           "Kelanjutan kisah komedi empat sekawan Agak Laen dengan petualangan yang jauh lebih lucu, seru, dan menyala!",
         rating: "8.3",
@@ -724,7 +726,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       jumbo: {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/a/ae/Jumbo_film_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/rbjTGOKWcL6xjhTMGhRN1YNejE5.jpg",
         synopsis:
           "Kisah petualangan animasi anak Indonesia yang penuh dengan kehangatan, persahabatan, dan nilai-nilai keluarga.",
         rating: "8.0",
@@ -733,7 +735,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "kkn di desa penari": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/b/b2/KKN_di_Desa_Penari_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/63InZxeGgfNQCoWkImR14fB99AY.jpg",
         synopsis:
           "Enam mahasiswa yang melaksanakan KKN di sebuah desa terpencil diperingatkan untuk tidak melewati batas gapura terlarang sang penari mistis.",
         rating: "7.9",
@@ -742,7 +744,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "siksa kubur": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/0/00/Siksa_Kubur_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/aBNkuQxJuWiaMjgXfyoVCJC9Blc.jpg",
         synopsis:
           "Setelah kedua orang tuanya menjadi korban bom bunuh diri, Sita tidak mempercayai agama dan mencari orang paling berdosa untuk membuktikan bahwa siksa kubur itu tidak ada.",
         rating: "8.2",
@@ -751,7 +753,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "pengabdi setan 2: communion": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/9/9a/Pengabdi_Setan_2_Communion.jpg",
+          "https://image.tmdb.org/t/p/w500/zzpxuEXS1azwhqfvtacLtScixbS.jpg",
         synopsis:
           "Beberapa tahun setelah berhasil menyelamatkan diri dari kejadian mengerikan yang membuat mereka kehilangan ibu dan adik bungsu, Rini dan keluarganya tinggal di rumah susun, menyadari bahwa tinggal bersama banyak orang juga bisa sangat berbahaya.",
         rating: "8.0",
@@ -760,7 +762,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "dilan 1990": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/0/07/Poster_Film_Dilan_1990.jpg",
+          "https://image.tmdb.org/t/p/w500/9jvJd0zbN166hA3caTiTTQ61h6G.jpg",
         synopsis:
           "Milea bertemu dengan Dilan di sebuah SMA di Bandung. Cara bicara Dilan yang jenaka dan romantis perlahan memikat hati Milea.",
         rating: "8.4",
@@ -769,7 +771,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "ipar adalah maut": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/3/30/Ipar_Adalah_Maut_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/yBnfwE2aUXyZojWQNSYjBz62qzG.jpg",
         synopsis:
           "Kehidupan rumah tangga Nisa dan Aris yang harmonis seketika berubah menjadi petaka setelah adik kandung Nisa, Rani, tinggal bersama mereka dan memulai perselingkuhan.",
         rating: "8.2",
@@ -778,7 +780,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "sekawan limo": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/9/90/Sekawan_Limo_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/4sYLSgUTwbudPu4GkU8LKWGXyRm.jpg",
         synopsis:
           "Lima pemuda mendaki Gunung Madyopuro dan melanggar mitos setempat: rombongan harus berjumlah genap dan dilarang menoleh ke belakang.",
         rating: "8.0",
@@ -787,7 +789,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "vina: sebelum 7 hari": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/4/4c/Vina_Sebelum_7_Hari.jpeg",
+          "https://image.tmdb.org/t/p/w500/j1xUlKVa8rS1c2mi0cZsjUSJ6G4.jpg",
         synopsis:
           "Arwah Vina yang meninggal secara tragis merasuki tubuh sahabatnya untuk mengungkap kebenaran kejam di balik kematiannya sebelum 7 hari.",
         rating: "7.5",
@@ -796,7 +798,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "kang mak from pee mak": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/4/49/Kang_Mak_from_Pee_Mak.jpeg",
+          "https://image.tmdb.org/t/p/w500/263aNd2xQxVZUpvA5iF4nUMjkrC.jpg",
         synopsis:
           "Mak pulang dari medan perang untuk bersatu kembali dengan istrinya, Sari, namun kawan-kawannya menyadari bahwa Sari sebenarnya sudah meninggal dan menjadi hantu.",
         rating: "8.1",
@@ -805,7 +807,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "laskar pelangi": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/8/85/Laskar_pelangi_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/pIkafUVOWa4LrInh0RF80KKBBeK.jpg",
         synopsis:
           "Kisah perjuangan sepuluh anak di Pulau Belitung yang bersekolah di sebuah sekolah dasar sederhana yang penuh dengan keterbatasan namun sarat mimpi.",
         rating: "8.5",
@@ -814,7 +816,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "gadis kretek": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/f/fa/Gadis_Kretek_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/3oEqWpG0c3E4J9v8pB3q3g9D0r1.jpg",
         synopsis:
           "Pencarian seorang anak akan cinta masa lalu ayahnya membawa dirinya mengungkap rahasia industri kretek keluarga di era 1960-an.",
         rating: "8.4",
@@ -823,7 +825,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "badarawuhi di desa penari": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/a/a2/Badarawuhi_di_Desa_Penari_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/2OH3EY2dkpHJVJkObLKTuvZRYKP.jpg",
         synopsis:
           "Kisah asal-usul entitas mistis penjaga Desa Penari, Badarawuhi, dan bagaimana ia menjerat jiwa-jiwa baru ke dalam tariannya yang tiada akhir.",
         rating: "7.8",
@@ -832,7 +834,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "miracle in cell no. 7": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/b/bf/Miracle_in_Cell_No._7_Indonesian_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/sOfUbzu6OUL5cscGODPdpHn9C1g.jpg",
         synopsis:
           "Seorang ayah berkebutuhan khusus dipenjarakan karena tuduhan pembunuhan berencana, dan rekan-rekan selnya membantu menyelundupkan putrinya ke dalam penjara.",
         rating: "8.3",
@@ -841,7 +843,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "sewu dino": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/3/39/Sewu_Dino_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/kSjkuebiNcHyJpIdLka3zD4Z7cM.jpg",
         synopsis:
           "Sri diterima bekerja untuk merawat seorang gadis sakit misterius yang terkena santet 1000 hari Sengarturih, dan harus bertahan hidup di gubuk terisolasi.",
         rating: "7.7",
@@ -850,7 +852,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "dilan 1991": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/2/29/Poster_Film_Dilan_1991.jpg",
+          "https://image.tmdb.org/t/p/w500/cWYFRd4XxB2ZNxIZ9HWMsf3eZjE.jpg",
         synopsis:
           "Kisah cinta Milea dan Dilan berlanjut di tahun 1991, di mana kepemimpinan Dilan dalam geng motor mulai menguji hubungan mereka.",
         rating: "8.1",
@@ -859,7 +861,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "warkop dki reborn: jangkrik boss! part 1": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/b/b3/Poster_film_Warkop_DKI_Reborn.jpg",
+          "https://image.tmdb.org/t/p/w500/95yweFRAHUzAHTKEFUqoMAeec8u.jpg",
         synopsis:
           "Dono, Kasino, dan Indro kembali sebagai petugas lembaga keamanan swasta CHIPS yang kocak dan selalu memicu kekacauan di kota.",
         rating: "7.8",
@@ -868,7 +870,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "pabrik gula": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/0/00/Siksa_Kubur_poster.jpg",
+          "https://image.tmdb.org/t/p/w500/eOdYhBFF7vE5v83KVVQfDEyLgEu.jpg",
         synopsis:
           "Teror misterius di sebuah pabrik gula tua terbengkalai yang mengungkap rahasia kelam sejarah masa lalu yang mengerikan.",
         rating: "7.6",
@@ -877,7 +879,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "habibie & ainun": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/8/81/Habibie_%26_Ainun_Poster.jpg",
+          "https://image.tmdb.org/t/p/w500/eOdYhBFF7vE5v83KVVQfDEyLgEu.jpg",
         synopsis:
           "Kisah cinta sejati yang luar biasa antara BJ Habibie, ilmuwan dirgantara jenius sekaligus Presiden RI ke-3, dengan belahan jiwanya Ainun Habibie.",
         rating: "8.4",
@@ -886,7 +888,7 @@ app.get("/api/indonesian-trending", async (req, res) => {
       },
       "pengabdi setan": {
         poster:
-          "https://upload.wikimedia.org/wikipedia/id/8/87/Poster_Pengabdi_Setan.jpg",
+          "https://image.tmdb.org/t/p/w500/xTWgncjZOrMmSjaEwA3DLOxaqf0.jpg",
         synopsis:
           "Setelah sang ibu meninggal dunia karena penyakit misterius, keluarga Rini mulai diteror oleh kehadiran makhluk halus yang menyerupai mendiang ibunya.",
         rating: "8.1",
@@ -917,7 +919,8 @@ app.get("/api/indonesian-trending", async (req, res) => {
         };
         let posterUrl = finalInfo.poster;
         let foundTmdbId = null;
-        if (film.wikiUrl) {
+
+        if (film.wikiUrl && (!info || !info.poster || info.poster === defaultPoster)) {
           const scraped = await scrapePosterFromWiki(film.wikiUrl, film.title);
           if (scraped) {
             posterUrl = scraped;
@@ -995,13 +998,14 @@ app.get("/api/indonesian-trending", async (req, res) => {
           year: yearNum,
           duration: finalInfo.duration,
           poster: posterUrl,
+          posterUrl: posterUrl,
           bannerUrl: posterUrl,
           match: 99 - index,
           synopsis: finalInfo.synopsis,
           viewersCount: film.viewers,
           rank: film.rank,
           director: film.director,
-          tmdbId: foundTmdbId || void 0,
+          tmdbId: finalInfo.tmdbId || foundTmdbId || void 0,
         };
       }),
     );
@@ -2274,7 +2278,7 @@ app.get("/api/detail", async (req, res) => {
         const lowerTitle = titleVal.toLowerCase().trim();
         const hardcodedIds: Record<string, { id: string, year?: number }> = {
           "agak laen": { id: "1175161", year: 2024 },
-          "agak laen: menyala pantiku!": { id: "1287571", year: 2024 },
+          "agak laen: menyala pantiku!": { id: "1287571", year: 2025 },
           "kkn di desa penari": { id: "638985", year: 2022 },
           "siksa kubur": { id: "1119527", year: 2024 },
           "pengabdi setan 2: communion": { id: "925786", year: 2022 },
@@ -2424,6 +2428,7 @@ app.get("/api/detail", async (req, res) => {
         if (tmdbId) {
           const sNum = season ? String(season) : "1";
           const eNum = episode ? String(episode) : "1";
+          let mappleUrl = "";
           let vidcoreUrl = "";
           let iembedUrl = "";
           let vidboltUrl = "";
@@ -2432,6 +2437,7 @@ app.get("/api/detail", async (req, res) => {
           let vidsrcXyzUrl = "";
           let multiEmbedUrl = "";
           if (isTvSeries) {
+            mappleUrl = `https://mapple.uk/watch/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
             vidcoreUrl = `https://www.vidcore.org/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             iembedUrl = `https://iembed.codeera.dev/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             vidboltUrl = `https://vidbolt.pro/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
@@ -2440,6 +2446,7 @@ app.get("/api/detail", async (req, res) => {
             vidsrcXyzUrl = `https://vidsrc.xyz/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${sNum}&e=${eNum}`;
           } else {
+            mappleUrl = `https://mapple.uk/watch/movie/${tmdbId}?autoPlay=true`;
             vidcoreUrl = `https://www.vidcore.org/embed/movie/${tmdbId}`;
             iembedUrl = `https://iembed.codeera.dev/embed/movie/${tmdbId}`;
             vidboltUrl = `https://vidbolt.pro/movie/${tmdbId}?autoPlay=true`;
@@ -2449,6 +2456,7 @@ app.get("/api/detail", async (req, res) => {
             multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
           }
           const embedSources = [
+            { name: "VIP Mapple 🍎", url: mappleUrl },
             { name: "VIP Vidcore 🔥", url: vidcoreUrl },
             { name: "VIP iEmbed 🚀", url: iembedUrl },
             { name: "VIP Vidbolt ⚡", url: vidboltUrl },
@@ -2745,6 +2753,14 @@ app.get("/api/detail", async (req, res) => {
       return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
     }
 
+    if (requestedServer === "mapple") {
+      const result = await fetchStrigil();
+      if (result) {
+        result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Mapple"))?.url || result.result.embedUrl;
+        detailCache.set(cacheKey, result);
+        return res.json(result);
+      }
+    }
     if (requestedServer === "vidcore") {
       const result = await fetchStrigil();
       if (result) {
