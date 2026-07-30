@@ -112,11 +112,11 @@ export function MovieGrid({
 
       {isSearching ? (
         variant === 'carousel' ? (
-          <div className="flex overflow-x-auto no-scrollbar gap-4 sm:gap-6 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex overflow-x-auto no-scrollbar gap-4 sm:gap-6 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
             {Array.from({ length: 5 }).map((_, idx) => (
               <div 
                 key={idx} 
-                className="w-[140px] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 aspect-[2/3] rounded-xl sm:rounded-2xl bg-zinc-200 dark:bg-zinc-800/60 animate-pulse flex flex-col justify-end p-3 sm:p-4"
+                className="w-[36vw] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 aspect-[2/3] rounded-xl sm:rounded-2xl bg-zinc-200 dark:bg-zinc-800/60 animate-pulse flex flex-col justify-end p-3 sm:p-4 snap-start"
               >
                 <div className="h-3.5 bg-zinc-300 dark:bg-zinc-700 rounded w-3/4 mb-2"></div>
                 <div className="h-2.5 bg-zinc-300 dark:bg-zinc-700 rounded w-1/2"></div>
@@ -161,13 +161,13 @@ export function MovieGrid({
               {/* Scrollable Container */}
               <div
                 ref={scrollRef}
-                className="flex overflow-x-auto no-scrollbar scroll-smooth gap-4 sm:gap-6 pb-6 pt-1 touch-pan-x touch-pan-y"
+                className="flex overflow-x-auto no-scrollbar scroll-smooth gap-4 sm:gap-6 pb-6 pt-1 touch-pan-x touch-pan-y snap-x snap-mandatory"
                 onScroll={checkScroll}
               >
                 {movies.map((movie, index) => (
                   <div 
                     key={`${movie.id}-${index}`} 
-                    className="w-[145px] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0"
+                    className="w-[36vw] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 snap-start"
                   >
                     <MovieCard movie={movie} index={index} onPlay={onPlay} />
                   </div>

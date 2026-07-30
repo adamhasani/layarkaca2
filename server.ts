@@ -243,7 +243,7 @@ __name(scrapeImdbKeywords, "scrapeImdbKeywords");
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
 app.get("/api/proxy", async (req, res) => {
   try {
-    const targetUrl = req.query.url;
+    const targetUrl = req.query.url as string;
     if (!targetUrl) {
       return res.status(400).send("URL is required");
     }
@@ -272,7 +272,7 @@ app.get("/api/proxy", async (req, res) => {
     });
     res.setHeader("Access-Control-Allow-Origin", "*");
     if (response.body) {
-      Readable.fromWeb(response.body).pipe(res);
+      Readable.fromWeb(response.body as any).pipe(res);
     } else {
       res.end();
     }
@@ -284,7 +284,7 @@ app.get("/api/proxy", async (req, res) => {
 const proxyImageCache = new Map();
 app.get("/api/image-proxy", async (req, res) => {
   try {
-    const targetUrl = req.query.url;
+    const targetUrl = req.query.url as string;
     if (!targetUrl || !targetUrl.startsWith("http")) {
       return res.status(400).send("Valid URL required");
     }
@@ -1826,7 +1826,7 @@ app.get("/api/trending", async (req, res) => {
   try {
     const queries = ["2025", "2024", "avengers", "spider-man"];
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    const query = req.query.query || "2025";
+    const query = req.query.query as string || "2025";
     const apiRes = await fetch(
       `https://www.keyrafara.com/search/idlix-search?query=${encodeURIComponent(query)}`,
     );
@@ -1879,7 +1879,7 @@ app.get("/api/trending", async (req, res) => {
 });
 app.get("/api/ai/search", async (req, res) => {
   try {
-    const userPrompt = req.query.prompt || "film komedi dan aksi terbaik";
+    const userPrompt = req.query.prompt as string || "film komedi dan aksi terbaik";
     let searchTerms = [userPrompt];
     try {
       const imdbRes = await fetch(
@@ -1963,7 +1963,7 @@ app.get("/api/ai/search", async (req, res) => {
 });
 app.get("/api/search", async (req, res) => {
   try {
-    const { query } = req.query;
+    const query = req.query.query as string;
     if (!query || typeof query !== "string") {
       return res.status(400).json({ error: "Query is required" });
     }
@@ -2166,7 +2166,7 @@ function isTitleMatch(queryTitle, targetTitle) {
 __name(isTitleMatch, "isTitleMatch");
 app.get("/api/subtitle", async (req, res) => {
   try {
-    const targetUrl = req.query.url;
+    const targetUrl = req.query.url as string;
     if (!targetUrl) return res.status(400).send("URL parameter is required");
     const subRes = await fetch(targetUrl);
     if (!subRes.ok)
@@ -2187,7 +2187,7 @@ app.get("/api/subtitle", async (req, res) => {
 });
 app.get("/api/stream-proxy", async (req, res) => {
   try {
-    const videoUrl = req.query.url;
+    const videoUrl = req.query.url as string;
     if (!videoUrl) return res.status(400).send("URL parameter is required");
     const headers = {
       "User-Agent":
@@ -2234,7 +2234,7 @@ app.get("/api/detail", async (req, res) => {
       season,
       episode,
       tmdbId: queryTmdbId,
-    } = req.query;
+    } = req.query as any;
     if (!query && !slug) {
       return res.status(400).json({ error: "Query or slug is required" });
     }
@@ -2913,15 +2913,7 @@ app.get("/api/detail", async (req, res) => {
     if (requestedServer === "auto") {
       let result;
 
-      // 1. lk21
-      result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
-      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
-
-      // 2. videasy
-      result = await fetchVideasy();
-      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
-
-      // 3. strigil tapi yang multi embed
+      // 1. strigil tapi yang multi embed
       result = await fetchStrigil();
       if (result) {
         const multiEmbedSrc = result.result?.embedSources?.find(s => s.name.includes("MultiEmbed"));
@@ -2933,8 +2925,8 @@ app.get("/api/detail", async (req, res) => {
         return res.json(result);
       }
 
-      // 4. strigil lagi tapi yang vip strigil lagi
-      // (This will only be reached if fetchStrigil() above somehow fails, which might be rare, but we follow the exact requested order)
+      // 2. strigil lagi tapi yang vip strigil lagi
+      // (This will only be reached if fetchStrigil() above somehow fails)
       result = await fetchStrigil();
       if (result) {
         result.server = "Strigil VIP";
@@ -2942,12 +2934,20 @@ app.get("/api/detail", async (req, res) => {
         return res.json(result);
       }
 
-      // 5. idlix
-      result = await fetchIdlixWrapper();
+      // 3. lk21
+      result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
       if (result) { detailCache.set(cacheKey, result); return res.json(result); }
 
-      // 6. moviebox
+      // 4. videasy
+      result = await fetchVideasy();
+      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
+
+      // 5. moviebox
       result = await fetchMoviebox(cleanQuery);
+      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
+
+      // 6. idlix
+      result = await fetchIdlixWrapper();
       if (result) { detailCache.set(cacheKey, result); return res.json(result); }
 
       const noMatchResult = { status: false, message: `Film '${query}' (${year || ''}) belum tersedia di server manapun.` };
