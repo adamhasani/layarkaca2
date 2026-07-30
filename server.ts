@@ -1970,30 +1970,58 @@ app.get("/api/search", async (req, res) => {
     const qTrim = query.trim();
     try {
       const tmdbKey = getTmdbApiKey();
-      const tmdbRes = await fetch(
-        `https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(qTrim)}&language=id-ID&page=1`,
-      );
-      const data2 = await tmdbRes.json();
-      if (data2.results && data2.results.length > 0) {
-        const results = data2.results
-          .filter((r) => r.media_type === "movie" || r.media_type === "tv")
-          .map((r) => ({
-            slug: r.id.toString(),
-            title: r.title || r.name,
-            synopsis: r.overview || `Saksikan ${r.title || r.name} gratis.`,
-            type: r.media_type === "tv" ? "series" : "movie",
-            poster: r.poster_path
-              ? `https://image.tmdb.org/t/p/w500${r.poster_path}`
-              : "",
-            year:
-              parseInt(
-                (r.release_date || r.first_air_date || "0").substring(0, 4),
-              ) || new Date().getFullYear(),
-            rating: r.vote_average ? parseFloat(r.vote_average.toFixed(1)) : 8,
-            genres: ["Movie"],
-            quality: "HD",
-            duration: "120m",
-          }));
+      const [tmdbResId, tmdbResEn] = await Promise.all([
+        fetch(
+          `https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(qTrim)}&language=id-ID&page=1`,
+        ),
+        fetch(
+          `https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(qTrim)}&language=en-US&page=1`,
+        )
+      ]);
+      const dataId = await tmdbResId.json();
+      const dataEn = await tmdbResEn.json();
+
+      if (dataId.results && dataId.results.length > 0) {
+        const results = dataId.results
+          .filter((r: any) => r.media_type === "movie" || r.media_type === "tv")
+          .map((r: any) => {
+            const enResult = dataEn.results?.find((enR: any) => enR.id === r.id);
+            let displayTitle = r.title || r.name;
+            const originalLang = r.original_language || enResult?.original_language || '';
+            const originalTitle = r.original_title || r.original_name || '';
+            
+            // If the Indonesian TMDB result just fell back to original title (e.g. Korean), and we have an English title, use the English title
+            if (enResult && displayTitle === originalTitle && !['id', 'en'].includes(originalLang)) {
+              displayTitle = enResult.title || enResult.name || displayTitle;
+            }
+
+            // Append country to title if it's not English or Indonesian to help distinguish remakes
+            if (!['en', 'id'].includes(originalLang)) {
+              const langNames: Record<string, string> = { 'ko': 'Korea', 'tr': 'Turki', 'th': 'Thailand', 'ja': 'Jepang', 'zh': 'China', 'hi': 'India', 'es': 'Spanyol', 'fr': 'Prancis' };
+              const countrySuffix = langNames[originalLang] ? ` (${langNames[originalLang]})` : ` (${originalLang.toUpperCase()})`;
+              displayTitle += countrySuffix;
+            } else if (originalLang === 'id') {
+              displayTitle += ' (Indonesia)';
+            }
+
+            return {
+              slug: r.id.toString(),
+              title: displayTitle,
+              synopsis: r.overview || enResult?.overview || `Saksikan ${displayTitle} gratis.`,
+              type: r.media_type === "tv" ? "series" : "movie",
+              poster: r.poster_path
+                ? `https://image.tmdb.org/t/p/w500${r.poster_path}`
+                : (enResult?.poster_path ? `https://image.tmdb.org/t/p/w500${enResult.poster_path}` : ""),
+              year:
+                parseInt(
+                  (r.release_date || r.first_air_date || enResult?.release_date || enResult?.first_air_date || "0").substring(0, 4),
+                ) || new Date().getFullYear(),
+              rating: r.vote_average ? parseFloat(r.vote_average.toFixed(1)) : (enResult?.vote_average ? parseFloat(enResult.vote_average.toFixed(1)) : 8),
+              genres: ["Movie"],
+              quality: "HD",
+              duration: "120m",
+            };
+          });
         return res.json({ status: true, result: { results } });
       }
     } catch (e) {
@@ -2244,34 +2272,47 @@ app.get("/api/detail", async (req, res) => {
           }
         }
         const lowerTitle = titleVal.toLowerCase().trim();
-        const hardcodedIds = {
-          "agak laen": "1175161",
-          "agak laen: menyala pantiku!": "1287571",
-          "kkn di desa penari": "638985",
-          "siksa kubur": "1119527",
-          "pengabdi setan 2: communion": "925786",
-          "dilan 1990": "492459",
-          "ipar adalah maut": "1181068",
-          "sekawan limo": "1279914",
-          "vina: sebelum 7 hari": "1148817",
-          "kang mak from pee mak": "1263112",
-          "laskar pelangi": "22421",
-          "badarawuhi di desa penari": "1176166",
-          "miracle in cell no. 7": "637920",
-          "sewu dino": "1052865",
-          "dilan 1991": "577970",
-          "warkop dki reborn: jangkrik boss! part 1": "405040",
-          "habibie & ainun": "172705",
-          "pengabdi setan": "467012",
+        const hardcodedIds: Record<string, { id: string, year?: number }> = {
+          "agak laen": { id: "1175161", year: 2024 },
+          "agak laen: menyala pantiku!": { id: "1287571", year: 2024 },
+          "kkn di desa penari": { id: "638985", year: 2022 },
+          "siksa kubur": { id: "1119527", year: 2024 },
+          "pengabdi setan 2: communion": { id: "925786", year: 2022 },
+          "dilan 1990": { id: "492459", year: 2018 },
+          "ipar adalah maut": { id: "1181068", year: 2024 },
+          "sekawan limo": { id: "1279914", year: 2024 },
+          "vina: sebelum 7 hari": { id: "1148817", year: 2024 },
+          "kang mak from pee mak": { id: "1263112", year: 2024 },
+          "laskar pelangi": { id: "22421", year: 2008 },
+          "badarawuhi di desa penari": { id: "1176166", year: 2024 },
+          "miracle in cell no. 7": { id: "637920", year: 2022 },
+          "sewu dino": { id: "1052865", year: 2023 },
+          "dilan 1991": { id: "577970", year: 2019 },
+          "warkop dki reborn: jangkrik boss! part 1": { id: "405040", year: 2016 },
+          "habibie & ainun": { id: "172705", year: 2012 },
+          "pengabdi setan": { id: "467012", year: 2017 },
         };
-        if (hardcodedIds[lowerTitle]) {
-          return hardcodedIds[lowerTitle];
-        }
+
+        const checkHardcoded = (key: string) => {
+          const match = hardcodedIds[key];
+          if (match) {
+            if (finalYear && match.year && finalYear !== match.year) {
+              return null; // Skip if year doesn't match
+            }
+            return match.id;
+          }
+          return null;
+        };
+
+        const exactMatch = checkHardcoded(lowerTitle);
+        if (exactMatch) return exactMatch;
+
         const matchKey = Object.keys(hardcodedIds).find(
-          (k) => lowerTitle.includes(k) || k.includes(lowerTitle),
+          (k) => lowerTitle === k || lowerTitle.replace(/[\:\-\,\.\!]/g, " ").replace(/\s+/g, " ").trim() === k.replace(/[\:\-\,\.\!]/g, " ").replace(/\s+/g, " ").trim()
         );
         if (matchKey) {
-          return hardcodedIds[matchKey];
+          const partialMatch = checkHardcoded(matchKey);
+          if (partialMatch) return partialMatch;
         }
         const cleanedTitle = titleVal
           .replace(/\(\d{4}\)/g, "")
@@ -2469,7 +2510,7 @@ app.get("/api/detail", async (req, res) => {
       }
       return null;
     }, "fetchStrigil");
-    const fetchLk21 = __name(async (q) => {
+    const fetchLk21 = __name(async (q: string, targetYear?: number) => {
       try {
         const lk21Res = await fetch(
           `https://www.keyrafara.com/streaming/lk21?query=${encodeURIComponent(q)}&server=auto`,
@@ -2482,11 +2523,19 @@ app.get("/api/detail", async (req, res) => {
             (lk21Data.result.sources && lk21Data.result.sources.length > 0) ||
             lk21Data.result.embedUrl)
         ) {
-          const subtitles = [];
           const resultData = lk21Data.result;
+          
+          if (targetYear && resultData.detail?.year) {
+            const lk21Year = parseInt(resultData.detail.year);
+            if (!isNaN(lk21Year) && Math.abs(lk21Year - targetYear) > 1) {
+              return null; // Year mismatch, skip LK21
+            }
+          }
+
+          const subtitles: any[] = [];
           let streamUrl = resultData.streamUrl || "";
           const embedUrl = resultData.embedUrl || "";
-          const sources = (resultData.sources || []).map((s) => ({
+          const sources = (resultData.sources || []).map((s: any) => ({
             label: s.label || s.resolution || "HD",
             url: s.url,
             type: s.type || "m3u8",
@@ -2511,7 +2560,7 @@ app.get("/api/detail", async (req, res) => {
           };
         }
       } catch (e) {
-        console.error("LK21 fetch error", e);
+        console.error("LK21 fetch error:", e);
       }
       return null;
     }, "fetchLk21");
@@ -2647,6 +2696,42 @@ app.get("/api/detail", async (req, res) => {
       }
       return null;
     }, "fetchVideasy");
+    let isIndo = false;
+    const apiKey = getTmdbApiKey();
+    if (apiKey) {
+      try {
+        const tmdbIdCheck = await resolveTmdbId(targetSlug, cleanQuery, year ? parseInt(year as string) : void 0, type);
+        if (tmdbIdCheck) {
+          const tmdbDetailRes = await fetch(`https://api.themoviedb.org/3/${isTvSeries ? 'tv' : 'movie'}/${tmdbIdCheck}?api_key=${apiKey}&language=en-US`);
+          if (tmdbDetailRes.ok) {
+            const data = await tmdbDetailRes.json();
+            if (data.original_language === 'id' || (data.origin_country && data.origin_country.includes('ID'))) {
+              isIndo = true;
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error checking indo film status", e);
+      }
+    }
+
+    if (isIndo) {
+      // Khusus film indo, langsung gunakan strigil MultiEmbed apa pun yang dipilih user (karena cuman strigil yg punya)
+      const result = await fetchStrigil();
+      if (result) {
+        const multiEmbedSrc = result.result?.embedSources?.find((s: any) => s.name.includes("MultiEmbed"));
+        if (multiEmbedSrc) {
+          result.result.embedUrl = multiEmbedSrc.url;
+        }
+        result.server = "Strigil MultiEmbed";
+        detailCache.set(cacheKey, result);
+        return res.json(result);
+      }
+      
+      // If it's an Indo film and Strigil fails, don't try other servers because Indo films are only on Strigil
+      return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
+    }
+
     if (requestedServer === "strigil") {
       const strigilResult = await fetchStrigil();
       if (strigilResult) {
@@ -2684,7 +2769,7 @@ app.get("/api/detail", async (req, res) => {
       return res.json(failVideasy);
     }
     if (requestedServer === "lk21") {
-      const lk21Result = await fetchLk21(cleanQuery);
+      const lk21Result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
       if (lk21Result) {
         detailCache.set(cacheKey, lk21Result);
         return res.json(lk21Result);
@@ -2826,46 +2911,10 @@ app.get("/api/detail", async (req, res) => {
     }
 
     if (requestedServer === "auto") {
-      let isIndo = false;
-      const apiKey = getTmdbApiKey();
-      if (apiKey) {
-        try {
-          const tmdbIdCheck = await resolveTmdbId(targetSlug, cleanQuery, year ? parseInt(year as string) : void 0, type);
-          if (tmdbIdCheck) {
-            const tmdbDetailRes = await fetch(`https://api.themoviedb.org/3/${isTvSeries ? 'tv' : 'movie'}/${tmdbIdCheck}?api_key=${apiKey}&language=en-US`);
-            if (tmdbDetailRes.ok) {
-              const data = await tmdbDetailRes.json();
-              if (data.original_language === 'id' || (data.origin_country && data.origin_country.includes('ID'))) {
-                isIndo = true;
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Error checking indo film status", e);
-        }
-      }
-
       let result;
 
-      if (isIndo) {
-        // Khusus film indo, langsung gunakan strigil
-        result = await fetchStrigil();
-        if (result) {
-          const multiEmbedSrc = result.result?.embedSources?.find((s: any) => s.name.includes("MultiEmbed"));
-          if (multiEmbedSrc) {
-            result.result.embedUrl = multiEmbedSrc.url;
-          }
-          result.server = "Strigil MultiEmbed";
-          detailCache.set(cacheKey, result);
-          return res.json(result);
-        }
-        
-        // If it's an Indo film and Strigil fails, don't try other servers because Indo films are only on Strigil
-        return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
-      }
-
       // 1. lk21
-      result = await fetchLk21(cleanQuery);
+      result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
       if (result) { detailCache.set(cacheKey, result); return res.json(result); }
 
       // 2. videasy
