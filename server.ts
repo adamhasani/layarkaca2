@@ -2826,7 +2826,40 @@ app.get("/api/detail", async (req, res) => {
     }
 
     if (requestedServer === "auto") {
+      let isIndo = false;
+      const apiKey = getTmdbApiKey();
+      if (apiKey) {
+        try {
+          const tmdbIdCheck = await resolveTmdbId(targetSlug, cleanQuery, year ? parseInt(year as string) : void 0, type);
+          if (tmdbIdCheck) {
+            const tmdbDetailRes = await fetch(`https://api.themoviedb.org/3/${isTvSeries ? 'tv' : 'movie'}/${tmdbIdCheck}?api_key=${apiKey}&language=en-US`);
+            if (tmdbDetailRes.ok) {
+              const data = await tmdbDetailRes.json();
+              if (data.original_language === 'id' || (data.origin_country && data.origin_country.includes('ID'))) {
+                isIndo = true;
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Error checking indo film status", e);
+        }
+      }
+
       let result;
+
+      if (isIndo) {
+        // Khusus film indo, langsung gunakan strigil
+        result = await fetchStrigil();
+        if (result) {
+          const multiEmbedSrc = result.result?.embedSources?.find((s: any) => s.name.includes("MultiEmbed"));
+          if (multiEmbedSrc) {
+            result.result.embedUrl = multiEmbedSrc.url;
+          }
+          result.server = "Strigil MultiEmbed";
+          detailCache.set(cacheKey, result);
+          return res.json(result);
+        }
+      }
 
       // 1. lk21
       result = await fetchLk21(cleanQuery);
