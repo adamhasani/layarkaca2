@@ -2859,6 +2859,9 @@ app.get("/api/detail", async (req, res) => {
           detailCache.set(cacheKey, result);
           return res.json(result);
         }
+        
+        // If it's an Indo film and Strigil fails, don't try other servers because Indo films are only on Strigil
+        return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
       }
 
       // 1. lk21
