@@ -2291,6 +2291,7 @@ app.get("/api/detail", async (req, res) => {
           "warkop dki reborn: jangkrik boss! part 1": { id: "405040", year: 2016 },
           "habibie & ainun": { id: "172705", year: 2012 },
           "pengabdi setan": { id: "467012", year: 2017 },
+          "jumbo": { id: "1049082" },
         };
 
         const checkHardcoded = (key: string) => {
