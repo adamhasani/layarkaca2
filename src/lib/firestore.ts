@@ -53,15 +53,25 @@ export const removeFromWatchlist = async (userId: string, movieId: string) => {
 };
 
 export const checkInWatchlist = async (userId: string, movieId: string) => {
-  const docRef = doc(db, 'watchlists', `${userId}_${movieId}`);
-  const snap = await getDoc(docRef);
-  return snap.exists();
+  try {
+    const docRef = doc(db, 'watchlists', `${userId}_${movieId}`);
+    const snap = await getDoc(docRef);
+    return snap.exists();
+  } catch (err: any) {
+    console.error("checkInWatchlist error:", err.message);
+    return false;
+  }
 };
 
 export const getWatchlist = async (userId: string) => {
-  const q = query(collection(db, 'watchlists'), where('userId', '==', userId));
-  const snap = await getDocs(q);
-  return snap.docs.map(doc => doc.data() as WatchlistItem);
+  try {
+    const q = query(collection(db, 'watchlists'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => doc.data() as WatchlistItem);
+  } catch (err: any) {
+    console.error("getWatchlist error:", err.message);
+    return [];
+  }
 };
 
 // History Functions
@@ -81,13 +91,18 @@ export const updateHistory = async (userId: string, movie: any, progress: number
 };
 
 export const getHistory = async (userId: string) => {
-  const q = query(collection(db, 'history'), where('userId', '==', userId));
-  const snap = await getDocs(q);
-  return snap.docs.map(doc => doc.data() as HistoryItem).sort((a, b) => {
-    const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
-    const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
-    return timeB - timeA;
-  });
+  try {
+    const q = query(collection(db, 'history'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => doc.data() as HistoryItem).sort((a, b) => {
+      const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
+      const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
+      return timeB - timeA;
+    });
+  } catch (err: any) {
+    console.error("getHistory error:", err.message);
+    return [];
+  }
 };
 
 // Reviews Functions

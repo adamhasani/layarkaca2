@@ -116,7 +116,7 @@ export function MovieGrid({
             {Array.from({ length: 5 }).map((_, idx) => (
               <div 
                 key={idx} 
-                className="w-[36vw] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 aspect-[2/3] rounded-xl sm:rounded-2xl bg-zinc-200 dark:bg-zinc-800/60 animate-pulse flex flex-col justify-end p-3 sm:p-4 snap-start"
+                className="w-[115px] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 aspect-[2/3] rounded-xl sm:rounded-2xl bg-zinc-200 dark:bg-zinc-800/60 animate-pulse flex flex-col justify-end p-3 sm:p-4 snap-start"
               >
                 <div className="h-3.5 bg-zinc-300 dark:bg-zinc-700 rounded w-3/4 mb-2"></div>
                 <div className="h-2.5 bg-zinc-300 dark:bg-zinc-700 rounded w-1/2"></div>
@@ -137,6 +137,9 @@ export function MovieGrid({
         <>
           {variant === 'carousel' ? (
             <div className="relative group/carousel -mx-4 px-4 sm:mx-0 sm:px-0">
+              {/* Mobile right fade indicator */}
+              <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-red-50 dark:from-[#0a0000] to-transparent z-20 pointer-events-none block md:hidden" />
+              
               {/* Arrow Buttons for desktop */}
               {showLeftArrow && movies.length > 0 && (
                 <button
@@ -167,7 +170,7 @@ export function MovieGrid({
                 {movies.map((movie, index) => (
                   <div 
                     key={`${movie.id}-${index}`} 
-                    className="w-[36vw] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 snap-start"
+                    className="w-[115px] sm:w-[180px] md:w-[210px] lg:w-[230px] shrink-0 snap-start"
                   >
                     <MovieCard movie={movie} index={index} onPlay={onPlay} />
                   </div>

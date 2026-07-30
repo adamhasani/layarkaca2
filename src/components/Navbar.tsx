@@ -197,6 +197,19 @@ export function Navbar({
                   <Search className="h-3.5 w-3.5 text-zinc-400 hover:text-[var(--color-primary-red)] hover:scale-110 transition-all" />
                 )}
               </button>
+              {localSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalSearch('');
+                    setSearchQuery('');
+                  }}
+                  className="absolute right-7 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-white transition-colors cursor-pointer"
+                  title="Clear Search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
               {setIsAiSearch && (
                 <button
                   type="button"

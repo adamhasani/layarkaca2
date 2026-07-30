@@ -396,7 +396,7 @@ export default function App() {
           reviews: [],
           match: 99
         })));
-      }).catch(err => console.error("Error fetching watchlist:", err));
+      }).catch(err => console.error("Error fetching watchlist:", err.message));
       getHistory(user.uid).then((items) => { console.log("History items:", items);
         setHistoryMovies(items.map(item => ({
           id: item.movieId,
@@ -602,6 +602,15 @@ export default function App() {
       <main>
         {searchQuery ? (
           <div className="pt-24 sm:pt-28 md:pt-32">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-200 dark:bg-zinc-800/50 hover:bg-zinc-300 dark:hover:bg-zinc-700/50 text-zinc-900 dark:text-white text-sm font-medium transition-all group cursor-pointer shadow-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:-translate-x-1"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                Kembali ke Beranda
+              </button>
+            </div>
             <MovieGrid 
               title={`Hasil Pencarian "${searchQuery}"`}
               movies={displayMovies}

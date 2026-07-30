@@ -21,7 +21,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [detailedMovie, setDetailedMovie] = useState<Movie | null>(movie);
-  const [selectedServer, setSelectedServer] = useState<'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21'>('auto');
+  const [selectedServer, setSelectedServer] = useState<'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt'>('auto');
   const [isDetailLoading, setIsDetailLoading] = useState<boolean>(!movie?.streamUrl && !movie?.embedUrl);
 
   const [selectedSubLang, setSelectedSubLang] = useState<string>('id');
@@ -115,7 +115,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   };
 
 
-  const fetchDetailForServer = (srv: 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21', seasonNum?: number, episodeNum?: number) => {
+  const fetchDetailForServer = (srv: 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt', seasonNum?: number, episodeNum?: number) => {
     if (!movie) return;
     setIsDetailLoading(true);
     setIsVideoLoading(true);
@@ -477,6 +477,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
 
                     {[
                       { id: 'auto', label: 'Auto (Otomatis Pilih Terbaik)', desc: 'Mencoba IDLIX, Strigil, Moviebox & Videasy' },
+                      { id: 'vidbolt', label: 'Server Vidbolt (VIP ⚡)', desc: 'Server baru, cepat & stabil' },
                       { id: 'strigil', label: 'Server Strigil (VIP 💎)', desc: 'Server premium multi-source, full speed HD' },
                       { id: 'idlix', label: 'Server IDLIX', desc: 'Server utama film & serial Barat/Indo' },
                       { id: 'moviebox', label: 'Server Moviebox ⚡', desc: 'Lancar & hemat kuota, rilis cepat' },
@@ -485,7 +486,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                       <button
                         key={srv.id}
                         onClick={() => {
-                          const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21';
+                          const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt';
                           setSelectedServer(srvId);
                           fetchDetailForServer(srvId);
                         }}
@@ -683,7 +684,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                       Menyiapkan Pemutar Film...
                     </span>
                     <span className="text-xs sm:text-sm text-zinc-400">
-                      Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : 'IDLIX, Strigil, Moviebox, Videasy & LK21'}...
+                      Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : selectedServer === 'vidbolt' ? 'Vidbolt' : 'IDLIX, Strigil, Moviebox, Videasy, LK21 & Vidbolt'}...
                     </span>
                     <span className="text-[11px] sm:text-xs text-zinc-500 mt-2 text-center max-w-[250px] sm:max-w-xs">
                       Jika film tidak berjalan atau terganggu (buffering), Anda bisa memilih server lain di bawah pemutar ini.
@@ -815,6 +816,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
             <div className="flex flex-wrap items-center gap-2">
               {[
                 { id: 'auto', label: 'Auto' },
+                { id: 'vidbolt', label: 'Vidbolt (VIP)' },
                 { id: 'strigil', label: 'Strigil (VIP)' },
                 { id: 'idlix', label: 'IDLIX' },
                 { id: 'moviebox', label: 'Moviebox' },
@@ -826,7 +828,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   <button
                     key={srv.id}
                     onClick={() => {
-                      const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21';
+                      const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt';
                       setSelectedServer(srvId);
                       fetchDetailForServer(srvId);
                     }}

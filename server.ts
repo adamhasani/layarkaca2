@@ -2423,22 +2423,26 @@ app.get("/api/detail", async (req, res) => {
         if (tmdbId) {
           const sNum = season ? String(season) : "1";
           const eNum = episode ? String(episode) : "1";
+          let vidboltUrl = "";
           let strigilUrl = "";
           let vidsrcUrl = "";
           let vidsrcXyzUrl = "";
           let multiEmbedUrl = "";
           if (isTvSeries) {
+            vidboltUrl = `https://vidbolt.pro/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
             strigilUrl = `https://strigil.cc/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             vidsrcUrl = `https://vidsrc.to/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             vidsrcXyzUrl = `https://vidsrc.xyz/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${sNum}&e=${eNum}`;
           } else {
+            vidboltUrl = `https://vidbolt.pro/movie/${tmdbId}?autoPlay=true`;
             strigilUrl = `https://strigil.cc/embed/movie/${tmdbId}`;
             vidsrcUrl = `https://vidsrc.to/embed/movie/${tmdbId}`;
             vidsrcXyzUrl = `https://vidsrc.xyz/embed/movie/${tmdbId}`;
             multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
           }
           const embedSources = [
+            { name: "VIP Vidbolt ⚡", url: vidboltUrl },
             { name: "VIP Strigil \u{1F48E}", url: strigilUrl },
             { name: "VIP Vidsrc \u26A1", url: vidsrcUrl },
             { name: "VIP Vidsrc XYZ \u{1F680}", url: vidsrcXyzUrl },
@@ -2732,9 +2736,18 @@ app.get("/api/detail", async (req, res) => {
       return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
     }
 
+    if (requestedServer === "vidbolt") {
+      const result = await fetchStrigil(); // fetchStrigil actually returns multiple sources including vidbolt
+      if (result) {
+        result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Vidbolt"))?.url || result.result.embedUrl;
+        detailCache.set(cacheKey, result);
+        return res.json(result);
+      }
+    }
     if (requestedServer === "strigil") {
       const strigilResult = await fetchStrigil();
       if (strigilResult) {
+        strigilResult.result.embedUrl = strigilResult.result.embedSources?.find(s => s.name.includes("Strigil"))?.url || strigilResult.result.embedUrl;
         detailCache.set(cacheKey, strigilResult);
         return res.json(strigilResult);
       }
