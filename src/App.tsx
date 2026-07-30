@@ -618,7 +618,10 @@ export default function App() {
             {isLoadingHome ? (
               <div className="pt-32 pb-64 flex flex-col items-center justify-center space-y-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600/80"></div>
-                <p className="text-zinc-500 font-medium">Memuat data film...</p>
+                <div className="text-center">
+                  <p className="text-zinc-500 font-medium">Memuat data film...</p>
+                  <p className="text-zinc-600 dark:text-zinc-400 text-xs mt-1">by adam hasani</p>
+                </div>
               </div>
             ) : (
               <>
