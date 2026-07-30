@@ -2423,18 +2423,24 @@ app.get("/api/detail", async (req, res) => {
         if (tmdbId) {
           const sNum = season ? String(season) : "1";
           const eNum = episode ? String(episode) : "1";
+          let vidcoreUrl = "";
+          let iembedUrl = "";
           let vidboltUrl = "";
           let strigilUrl = "";
           let vidsrcUrl = "";
           let vidsrcXyzUrl = "";
           let multiEmbedUrl = "";
           if (isTvSeries) {
+            vidcoreUrl = `https://www.vidcore.org/embed/tv/${tmdbId}/${sNum}/${eNum}`;
+            iembedUrl = `https://iembed.codeera.dev/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             vidboltUrl = `https://vidbolt.pro/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
             strigilUrl = `https://strigil.cc/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             vidsrcUrl = `https://vidsrc.to/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             vidsrcXyzUrl = `https://vidsrc.xyz/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${sNum}&e=${eNum}`;
           } else {
+            vidcoreUrl = `https://www.vidcore.org/embed/movie/${tmdbId}`;
+            iembedUrl = `https://iembed.codeera.dev/embed/movie/${tmdbId}`;
             vidboltUrl = `https://vidbolt.pro/movie/${tmdbId}?autoPlay=true`;
             strigilUrl = `https://strigil.cc/embed/movie/${tmdbId}`;
             vidsrcUrl = `https://vidsrc.to/embed/movie/${tmdbId}`;
@@ -2442,6 +2448,8 @@ app.get("/api/detail", async (req, res) => {
             multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
           }
           const embedSources = [
+            { name: "VIP Vidcore 🔥", url: vidcoreUrl },
+            { name: "VIP iEmbed 🚀", url: iembedUrl },
             { name: "VIP Vidbolt ⚡", url: vidboltUrl },
             { name: "VIP Strigil \u{1F48E}", url: strigilUrl },
             { name: "VIP Vidsrc \u26A1", url: vidsrcUrl },
@@ -2736,6 +2744,22 @@ app.get("/api/detail", async (req, res) => {
       return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
     }
 
+    if (requestedServer === "vidcore") {
+      const result = await fetchStrigil();
+      if (result) {
+        result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Vidcore"))?.url || result.result.embedUrl;
+        detailCache.set(cacheKey, result);
+        return res.json(result);
+      }
+    }
+    if (requestedServer === "iembed") {
+      const result = await fetchStrigil();
+      if (result) {
+        result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("iEmbed"))?.url || result.result.embedUrl;
+        detailCache.set(cacheKey, result);
+        return res.json(result);
+      }
+    }
     if (requestedServer === "vidbolt") {
       const result = await fetchStrigil(); // fetchStrigil actually returns multiple sources including vidbolt
       if (result) {

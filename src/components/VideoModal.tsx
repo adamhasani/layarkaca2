@@ -21,7 +21,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [detailedMovie, setDetailedMovie] = useState<Movie | null>(movie);
-  const [selectedServer, setSelectedServer] = useState<'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt'>('auto');
+  const [selectedServer, setSelectedServer] = useState<'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore'>('auto');
   const [isDetailLoading, setIsDetailLoading] = useState<boolean>(!movie?.streamUrl && !movie?.embedUrl);
 
   const [selectedSubLang, setSelectedSubLang] = useState<string>('id');
@@ -115,7 +115,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   };
 
 
-  const fetchDetailForServer = (srv: 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt', seasonNum?: number, episodeNum?: number) => {
+  const fetchDetailForServer = (srv: 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore', seasonNum?: number, episodeNum?: number) => {
     if (!movie) return;
     setIsDetailLoading(true);
     setIsVideoLoading(true);
@@ -477,6 +477,8 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
 
                     {[
                       { id: 'auto', label: 'Auto (Otomatis Pilih Terbaik)', desc: 'Mencoba IDLIX, Strigil, Moviebox & Videasy' },
+                      { id: 'vidcore', label: 'Server Vidcore (VIP 🔥)', desc: 'Server andalan untuk streaming lancar' },
+                      { id: 'iembed', label: 'Server iEmbed (VIP 🚀)', desc: 'Server super cepat & stabil tanpa iklan' },
                       { id: 'vidbolt', label: 'Server Vidbolt (VIP ⚡)', desc: 'Server baru, cepat & stabil' },
                       { id: 'strigil', label: 'Server Strigil (VIP 💎)', desc: 'Server premium multi-source, full speed HD' },
                       { id: 'idlix', label: 'Server IDLIX', desc: 'Server utama film & serial Barat/Indo' },
@@ -486,7 +488,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                       <button
                         key={srv.id}
                         onClick={() => {
-                          const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt';
+                          const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore';
                           setSelectedServer(srvId);
                           fetchDetailForServer(srvId);
                         }}
@@ -684,7 +686,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                       Menyiapkan Pemutar Film...
                     </span>
                     <span className="text-xs sm:text-sm text-zinc-400">
-                      Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : selectedServer === 'vidbolt' ? 'Vidbolt' : 'IDLIX, Strigil, Moviebox, Videasy, LK21 & Vidbolt'}...
+                      Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : selectedServer === 'vidbolt' ? 'Vidbolt' : selectedServer === 'iembed' ? 'iEmbed' : selectedServer === 'vidcore' ? 'Vidcore' : 'IDLIX, Strigil, Moviebox, Videasy, LK21, Vidbolt, iEmbed & Vidcore'}...
                     </span>
                     <span className="text-[11px] sm:text-xs text-zinc-500 mt-2 text-center max-w-[250px] sm:max-w-xs">
                       Jika film tidak berjalan atau terganggu (buffering), Anda bisa memilih server lain di bawah pemutar ini.
@@ -716,9 +718,21 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                     <span className="text-xs text-zinc-400 w-full sm:w-auto">Coba ganti server:</span>
                     <button
                       onClick={() => { setSelectedServer('videasy'); fetchDetailForServer('videasy'); }}
+                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
+                    >
+                      Coba Server Videasy
+                    </button>
+                    <button
+                      onClick={() => { setSelectedServer('vidcore'); fetchDetailForServer('vidcore'); }}
                       className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold border border-red-500/30 transition-all shadow-md shadow-red-600/10"
                     >
-                      Coba Server Videasy 🚀
+                      Coba Server Vidcore 🔥
+                    </button>
+                    <button
+                      onClick={() => { setSelectedServer('iembed'); fetchDetailForServer('iembed'); }}
+                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
+                    >
+                      Coba Server iEmbed
                     </button>
                     <button
                       onClick={() => { setSelectedServer('strigil'); fetchDetailForServer('strigil'); }}
@@ -816,6 +830,8 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
             <div className="flex flex-wrap items-center gap-2">
               {[
                 { id: 'auto', label: 'Auto' },
+                { id: 'vidcore', label: 'Vidcore (VIP)' },
+                { id: 'iembed', label: 'iEmbed (VIP)' },
                 { id: 'vidbolt', label: 'Vidbolt (VIP)' },
                 { id: 'strigil', label: 'Strigil (VIP)' },
                 { id: 'idlix', label: 'IDLIX' },
@@ -828,7 +844,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   <button
                     key={srv.id}
                     onClick={() => {
-                      const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt';
+                      const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore';
                       setSelectedServer(srvId);
                       fetchDetailForServer(srvId);
                     }}
