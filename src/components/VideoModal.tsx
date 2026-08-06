@@ -26,6 +26,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
 
   const [selectedSubLang, setSelectedSubLang] = useState<string>('id');
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
+  const [showStuckWarning, setShowStuckWarning] = useState<boolean>(false);
   const [subFontSize, setSubFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
   const [activeSettingsTab, setActiveSettingsTab] = useState<'server' | 'quality' | 'subtitle'>('quality');
 
@@ -198,6 +199,17 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   const hasTrackedHistory = useRef(false);
 
   // User-dependent side effects
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (detailedMovie?.embedUrl || detailedMovie?.streamUrl) {
+      setShowStuckWarning(false);
+      timeout = setTimeout(() => {
+        setShowStuckWarning(true);
+      }, 8000);
+    }
+    return () => clearTimeout(timeout);
+  }, [detailedMovie?.embedUrl, detailedMovie?.streamUrl]);
+
   useEffect(() => {
     if (!movie) return;
     if (user && movie.id) {
@@ -651,6 +663,16 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                     <Loader2 className="w-12 h-12 text-[var(--color-primary-red)] animate-spin" />
                   </div>
                 )}
+                {showStuckWarning && (
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-full py-1.5 px-4 flex items-center gap-3 shadow-2xl">
+                      <span className="text-xs text-white font-medium">Masih loading? Coba ganti server di bawah 👇</span>
+                      <button onClick={() => setShowStuckWarning(false)} className="text-zinc-400 hover:text-white">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             ) : detailedMovie.embedUrl ? (
               <>
@@ -659,12 +681,22 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   src={detailedMovie.embedUrl} 
                   className="w-full h-full border-0 absolute top-0 left-0 z-10"
                   allowFullScreen
-                  sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+                  sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
                   onLoad={() => setIsVideoLoading(false)}
                 />
                 {isVideoLoading && (
                   <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-black/40 backdrop-blur-sm">
                     <Loader2 className="w-12 h-12 text-[var(--color-primary-red)] animate-spin" />
+                  </div>
+                )}
+                {showStuckWarning && (
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-full py-1.5 px-4 flex items-center gap-3 shadow-2xl">
+                      <span className="text-xs text-white font-medium">Masih loading? Coba ganti server di bawah 👇</span>
+                      <button onClick={() => setShowStuckWarning(false)} className="text-zinc-400 hover:text-white">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </>
