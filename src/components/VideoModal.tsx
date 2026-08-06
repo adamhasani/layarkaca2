@@ -357,8 +357,8 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
           className="relative w-full max-w-5xl bg-[#0a0a0a] rounded-2xl sm:rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl flex flex-col my-auto z-10"
         >
           {/* Header Controls */}
-          <div className="absolute top-0 left-0 right-0 p-3 sm:p-5 flex justify-between items-center z-30 bg-gradient-to-b from-black/95 via-black/60 to-transparent pointer-events-none">
-            <div className="flex items-center gap-2.5 pr-4 pointer-events-auto overflow-hidden">
+          <div className="relative w-full p-3 sm:px-5 sm:py-4 flex justify-between items-center z-30 bg-[#0a0a0a] border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-2.5 pr-4 overflow-hidden">
               <h2 className="text-white font-display font-semibold text-sm sm:text-lg md:text-xl drop-shadow-md truncate">{detailedMovie.title}</h2>
               {detailedMovie.server && (
                 <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
@@ -367,7 +367,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
               )}
             </div>
 
-            <div className="flex items-center gap-2 pointer-events-auto shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {/* Single Unified Pengaturan Button */}
               {/* Share Action */}
               <button
@@ -476,15 +476,16 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                     </span>
 
                     {[
-                      { id: 'auto', label: 'Auto (Otomatis Pilih Terbaik)', desc: 'Mencoba IDLIX, Strigil, Moviebox & Videasy' },
+                      { id: 'auto', label: 'Auto (Otomatis Pilih Terbaik)', desc: 'Mencoba LK21, Videasy, Moviebox, IDLIX & Strigil' },
                       { id: 'mapple', label: 'Server Mapple (VIP 🍎)', desc: 'Server kencang kualitas tinggi' },
                       { id: 'vidcore', label: 'Server Vidcore (VIP 🔥)', desc: 'Server andalan untuk streaming lancar' },
                       { id: 'iembed', label: 'Server iEmbed (VIP 🚀)', desc: 'Server super cepat & stabil tanpa iklan' },
                       { id: 'vidbolt', label: 'Server Vidbolt (VIP ⚡)', desc: 'Server baru, cepat & stabil' },
                       { id: 'strigil', label: 'Server Strigil (VIP 💎)', desc: 'Server premium multi-source, full speed HD' },
                       { id: 'idlix', label: 'Server IDLIX', desc: 'Server utama film & serial Barat/Indo' },
+                      { id: 'lk21', label: 'Server LK21 🇮🇩', desc: 'Lengkap untuk film Indonesia & Asia' },
                       { id: 'moviebox', label: 'Server Moviebox ⚡', desc: 'Lancar & hemat kuota, rilis cepat' },
-                      { id: 'videasy', label: 'Server Videasy 🚀', desc: 'Server alternatif, cepat, andal & jernih' }
+                      { id: 'videasy', label: 'Server Videasy 🚀', desc: 'Cepat & andal (Pilih server Cypher di dalam Player jika Subtitle Yoru hilang)' }
                     ].map(srv => (
                       <button
                         key={srv.id}
@@ -759,6 +760,12 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                     >
                       Coba Server IDLIX
                     </button>
+                    <button
+                      onClick={() => { setSelectedServer('lk21'); fetchDetailForServer('lk21'); }}
+                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
+                    >
+                      Coba Server LK21
+                    </button>
                   </div>
 
                   <button
@@ -842,6 +849,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                 { id: 'iembed', label: 'iEmbed (VIP)' },
                 { id: 'vidbolt', label: 'Vidbolt (VIP)' },
                 { id: 'strigil', label: 'Strigil (VIP)' },
+                { id: 'lk21', label: 'LK21' },
                 { id: 'idlix', label: 'IDLIX' },
                 { id: 'moviebox', label: 'Moviebox' },
                 { id: 'videasy', label: 'Videasy' },

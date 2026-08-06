@@ -2966,44 +2966,44 @@ app.get("/api/detail", async (req, res) => {
 
     if (requestedServer === "auto") {
       let result;
+      
+      const runScraper = async (prom) => {
+        try {
+          const res = await prom;
+          if (res && res.status) return res;
+        } catch (e) {}
+        throw new Error('Not found');
+      };
 
-      // 1. strigil tapi yang multi embed
-      result = await fetchStrigil();
-      if (result) {
-        const multiEmbedSrc = result.result?.embedSources?.find(s => s.name.includes("MultiEmbed"));
-        if (multiEmbedSrc) {
-          result.result.embedUrl = multiEmbedSrc.url;
+      try {
+        const scrapers = [];
+        if (isIndo) {
+           scrapers.push(runScraper(fetchLk21(cleanQuery, year ? parseInt(year) : undefined)));
+           scrapers.push(runScraper(fetchVideasy()));
+        } else {
+           scrapers.push(runScraper(fetchLk21(cleanQuery, year ? parseInt(year) : undefined)));
+           scrapers.push(runScraper(fetchVideasy()));
+           scrapers.push(runScraper(fetchMoviebox(cleanQuery)));
+           scrapers.push(runScraper(fetchIdlixWrapper()));
         }
-        result.server = "Strigil MultiEmbed";
+        result = await Promise.any(scrapers);
+      } catch (e) {
+        // All real scrapers failed (meaning we couldn't verify the video exists on those platforms)
+        // Fallback to Strigil which blindly constructs URLs based on TMDB ID
+        result = await fetchStrigil();
+        if (result) {
+          const multiEmbedSrc = result.result?.embedSources?.find(s => s.name.includes("MultiEmbed"));
+          if (multiEmbedSrc) {
+            result.result.embedUrl = multiEmbedSrc.url;
+          }
+          result.server = "Strigil MultiEmbed";
+        }
+      }
+
+      if (result && result.status) {
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
-
-      // 2. strigil lagi tapi yang vip strigil lagi
-      // (This will only be reached if fetchStrigil() above somehow fails)
-      result = await fetchStrigil();
-      if (result) {
-        result.server = "Strigil VIP";
-        detailCache.set(cacheKey, result);
-        return res.json(result);
-      }
-
-      // 3. lk21
-      result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
-      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
-
-      // 4. videasy
-      result = await fetchVideasy();
-      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
-
-      // 5. moviebox
-      result = await fetchMoviebox(cleanQuery);
-      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
-
-      // 6. idlix
-      result = await fetchIdlixWrapper();
-      if (result) { detailCache.set(cacheKey, result); return res.json(result); }
-
       const noMatchResult = { status: false, message: `Film '${query}' (${year || ''}) belum tersedia di server manapun.` };
       detailCache.set(cacheKey, noMatchResult);
       return res.json(noMatchResult);
