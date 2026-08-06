@@ -659,7 +659,6 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   src={detailedMovie.embedUrl} 
                   className="w-full h-full border-0 absolute top-0 left-0 z-10"
                   allowFullScreen
-                  sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
                   onLoad={() => setIsVideoLoading(false)}
                 />
                 {isVideoLoading && (
