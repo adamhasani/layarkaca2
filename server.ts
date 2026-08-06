@@ -2430,40 +2430,20 @@ app.get("/api/detail", async (req, res) => {
           const eNum = episode ? String(episode) : "1";
           let mappleUrl = "";
           let vidcoreUrl = "";
-          let iembedUrl = "";
-          let vidboltUrl = "";
           let strigilUrl = "";
-          let vidsrcUrl = "";
-          let vidsrcXyzUrl = "";
-          let multiEmbedUrl = "";
           if (isTvSeries) {
             mappleUrl = `https://mapple.uk/watch/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
             vidcoreUrl = `https://www.vidcore.org/embed/tv/${tmdbId}/${sNum}/${eNum}`;
-            iembedUrl = `https://iembed.codeera.dev/embed/tv/${tmdbId}/${sNum}/${eNum}`;
-            vidboltUrl = `https://vidbolt.pro/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
             strigilUrl = `https://strigil.cc/embed/tv/${tmdbId}/${sNum}/${eNum}`;
-            vidsrcUrl = `https://vidsrc.to/embed/tv/${tmdbId}/${sNum}/${eNum}`;
-            vidsrcXyzUrl = `https://vidsrc.xyz/embed/tv/${tmdbId}/${sNum}/${eNum}`;
-            multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${sNum}&e=${eNum}`;
           } else {
             mappleUrl = `https://mapple.uk/watch/movie/${tmdbId}?autoPlay=true`;
             vidcoreUrl = `https://www.vidcore.org/embed/movie/${tmdbId}`;
-            iembedUrl = `https://iembed.codeera.dev/embed/movie/${tmdbId}`;
-            vidboltUrl = `https://vidbolt.pro/movie/${tmdbId}?autoPlay=true`;
             strigilUrl = `https://strigil.cc/embed/movie/${tmdbId}`;
-            vidsrcUrl = `https://vidsrc.to/embed/movie/${tmdbId}`;
-            vidsrcXyzUrl = `https://vidsrc.xyz/embed/movie/${tmdbId}`;
-            multiEmbedUrl = `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
           }
           const embedSources = [
             { name: "VIP Mapple 🍎", url: mappleUrl },
             { name: "VIP Vidcore 🔥", url: vidcoreUrl },
-            { name: "VIP iEmbed 🚀", url: iembedUrl },
-            { name: "VIP Vidbolt ⚡", url: vidboltUrl },
-            { name: "VIP Strigil \u{1F48E}", url: strigilUrl },
-            { name: "VIP Vidsrc \u26A1", url: vidsrcUrl },
-            { name: "VIP Vidsrc XYZ \u{1F680}", url: vidsrcXyzUrl },
-            { name: "VIP MultiEmbed \u{1F37F}", url: multiEmbedUrl },
+            { name: "VIP Strigil \u{1F48E}", url: strigilUrl }
           ];
           let movieDetails = null;
           const apiKey = getTmdbApiKey();
@@ -2585,10 +2565,16 @@ app.get("/api/detail", async (req, res) => {
       }
       return null;
     }, "fetchLk21");
-    const fetchMoviebox = __name(async (q) => {
+    const fetchMoviebox = __name(async (q, isTv, season, episode) => {
       try {
+        const endpoint = isTv ? 'moviebox-series' : 'moviebox';
+        const params = new URLSearchParams({ query: q });
+        if (isTv) {
+          params.append('season', season ? String(season) : '1');
+          params.append('episode', episode ? String(episode) : '1');
+        }
         const mbRes = await fetch(
-          `https://www.keyrafara.com/streaming/moviebox?q=${encodeURIComponent(q)}`,
+          `https://www.keyrafara.com/streaming/${endpoint}?${params.toString()}`,
         );
         const mbData = await mbRes.json();
         if (
@@ -2605,7 +2591,7 @@ app.get("/api/detail", async (req, res) => {
           }));
           const sources = (mbData.result.sources || []).map((s) => ({
             label: s.label || s.resolution || "HD",
-            url: s.url,
+            url: s.url?.startsWith('/') ? `https://www.keyrafara.com${s.url}` : s.url,
             type: s.type || "mp4",
           }));
           const smoothSource =
@@ -2615,7 +2601,7 @@ app.get("/api/detail", async (req, res) => {
             sources[0];
           const defaultStreamUrl = smoothSource
             ? smoothSource.url
-            : mbData.result.streamUrl || "";
+            : mbData.result.streamUrl?.startsWith('/') ? `https://www.keyrafara.com${mbData.result.streamUrl}` : (mbData.result.streamUrl || "");
           return {
             status: true,
             server: "Moviebox",
@@ -2623,6 +2609,7 @@ app.get("/api/detail", async (req, res) => {
               title: mbData.result.title,
               poster: mbData.result.poster,
               streamUrl: defaultStreamUrl,
+              embedUrl: mbData.result.embedUrl?.startsWith('/') ? `https://www.keyrafara.com${mbData.result.embedUrl}` : (mbData.result.embedUrl || defaultStreamUrl),
               sources,
               subtitles,
               detail: {
@@ -2769,22 +2756,6 @@ app.get("/api/detail", async (req, res) => {
         return res.json(result);
       }
     }
-    if (requestedServer === "iembed") {
-      const result = await fetchStrigil();
-      if (result) {
-        result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("iEmbed"))?.url || result.result.embedUrl;
-        detailCache.set(cacheKey, result);
-        return res.json(result);
-      }
-    }
-    if (requestedServer === "vidbolt") {
-      const result = await fetchStrigil(); // fetchStrigil actually returns multiple sources including vidbolt
-      if (result) {
-        result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Vidbolt"))?.url || result.result.embedUrl;
-        detailCache.set(cacheKey, result);
-        return res.json(result);
-      }
-    }
     if (requestedServer === "strigil") {
       const strigilResult = await fetchStrigil();
       if (strigilResult) {
@@ -2799,7 +2770,7 @@ app.get("/api/detail", async (req, res) => {
       return res.json(failStrigil);
     }
     if (requestedServer === "moviebox") {
-      const mbResult = await fetchMoviebox(cleanQuery);
+      const mbResult = await fetchMoviebox(cleanQuery, isTvSeries, season, episode);
       if (mbResult) {
         detailCache.set(cacheKey, mbResult);
         return res.json(mbResult);
@@ -2983,7 +2954,7 @@ app.get("/api/detail", async (req, res) => {
         } else {
            scrapers.push(runScraper(fetchLk21(cleanQuery, year ? parseInt(year) : undefined)));
            scrapers.push(runScraper(fetchVideasy()));
-           scrapers.push(runScraper(fetchMoviebox(cleanQuery)));
+           scrapers.push(runScraper(fetchMoviebox(cleanQuery, isTvSeries, season, episode)));
            scrapers.push(runScraper(fetchIdlixWrapper()));
         }
         result = await Promise.any(scrapers);

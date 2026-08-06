@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTheme } from './hooks/useTheme';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './contexts/AuthContext';
 import { getWatchlist, getHistory, WatchlistItem, HistoryItem } from './lib/firestore';
 import { Navbar } from './components/Navbar';
 import { FeaturedHero } from './components/FeaturedHero';

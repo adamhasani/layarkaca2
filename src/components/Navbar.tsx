@@ -2,7 +2,7 @@ import { Search, Bell, Moon, Sun, Menu, X, Loader2, Sparkles, Home, Flame, Film,
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Notification } from '../types';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { AuthModal } from './AuthModal';
 
 interface NavbarProps {

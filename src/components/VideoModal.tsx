@@ -1,7 +1,7 @@
 import { X, Settings, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { addToWatchlist, removeFromWatchlist, checkInWatchlist, addReview, getReviews, updateHistory, ReviewItem } from '../lib/firestore';
 import Hls from 'hls.js';
 import { Movie } from '../types';
@@ -21,7 +21,8 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [detailedMovie, setDetailedMovie] = useState<Movie | null>(movie);
-  const [selectedServer, setSelectedServer] = useState<'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore' | 'mapple'>('auto');
+  const [selectedServer, setSelectedServer] = useState<'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidcore' | 'mapple'>('auto');
+  const [hasSelectedServer, setHasSelectedServer] = useState<boolean>(!!(movie?.streamUrl || movie?.embedUrl));
   const [isDetailLoading, setIsDetailLoading] = useState<boolean>(!movie?.streamUrl && !movie?.embedUrl);
 
   const [selectedSubLang, setSelectedSubLang] = useState<string>('id');
@@ -116,7 +117,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
   };
 
 
-  const fetchDetailForServer = (srv: 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore' | 'mapple', seasonNum?: number, episodeNum?: number) => {
+  const fetchDetailForServer = (srv: 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidcore' | 'mapple', seasonNum?: number, episodeNum?: number) => {
     if (!movie) return;
     setIsDetailLoading(true);
     setIsVideoLoading(true);
@@ -239,7 +240,8 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
     setSelectedEpisode(1);
     
     if (!movie.streamUrl && !movie.embedUrl) {
-      fetchDetailForServer(selectedServer, 1, 1);
+      // Tunggu user pilih server, jangan fetch auto
+      // fetchDetailForServer(selectedServer, 1, 1);
     } else {
       setIsDetailLoading(false);
     }
@@ -480,48 +482,6 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   </button>
                 </div>
 
-                {/* Tab 1: Server Choice */}
-                {activeSettingsTab === 'server' && (
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider block">
-                      Pilih Server Streaming
-                    </span>
-
-                    {[
-                      { id: 'auto', label: 'Auto (Otomatis Pilih Terbaik)', desc: 'Mencoba LK21, Videasy, Moviebox, IDLIX & Strigil' },
-                      { id: 'mapple', label: 'Server Mapple (VIP 🍎)', desc: 'Server kencang kualitas tinggi' },
-                      { id: 'vidcore', label: 'Server Vidcore (VIP 🔥)', desc: 'Server andalan untuk streaming lancar' },
-                      { id: 'iembed', label: 'Server iEmbed (VIP 🚀)', desc: 'Server super cepat & stabil tanpa iklan' },
-                      { id: 'vidbolt', label: 'Server Vidbolt (VIP ⚡)', desc: 'Server baru, cepat & stabil' },
-                      { id: 'strigil', label: 'Server Strigil (VIP 💎)', desc: 'Server premium multi-source, full speed HD' },
-                      { id: 'idlix', label: 'Server IDLIX', desc: 'Server utama film & serial Barat/Indo' },
-                      { id: 'lk21', label: 'Server LK21 🇮🇩', desc: 'Lengkap untuk film Indonesia & Asia' },
-                      { id: 'moviebox', label: 'Server Moviebox ⚡', desc: 'Lancar & hemat kuota, rilis cepat' },
-                      { id: 'videasy', label: 'Server Videasy 🚀', desc: 'Cepat & andal (Pilih server Cypher di dalam Player jika Subtitle Yoru hilang)' }
-                    ].map(srv => (
-                      <button
-                        key={srv.id}
-                        onClick={() => {
-                          const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore' | 'mapple';
-                          setSelectedServer(srvId);
-                          fetchDetailForServer(srvId);
-                        }}
-                        className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left border transition-all ${
-                          selectedServer === srv.id
-                            ? 'bg-red-500/15 border-red-500/50 text-white'
-                            : 'bg-white/5 border-white/5 hover:bg-white/10 text-zinc-300'
-                        }`}
-                      >
-                        <div>
-                          <div className="text-xs font-semibold">{srv.label}</div>
-                          <div className="text-[10px] text-zinc-400 mt-0.5">{srv.desc}</div>
-                        </div>
-                        {selectedServer === srv.id && <Check className="w-4 h-4 text-red-400 shrink-0" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
                 {/* Tab 2: Quality Choice */}
                 {activeSettingsTab === 'quality' && (
                   <div className="space-y-2">
@@ -699,6 +659,50 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   </div>
                 )}
               </>
+            ) : !hasSelectedServer ? (
+              <>
+                <img 
+                  src={typeof detailedMovie.bannerUrl === 'string' ? detailedMovie.bannerUrl.replace('/w500/', '/original/') : (detailedMovie.posterUrl || 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2TGbiU05v.jpg')} 
+                  alt={detailedMovie.title} 
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover opacity-30 blur-sm scale-105"
+                />
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/60 backdrop-blur-md p-6 text-center z-50 overflow-y-auto">
+                  <div className="flex flex-col items-center gap-1 w-full max-w-2xl my-auto py-8">
+                    <span className="text-white font-display font-bold text-xl sm:text-2xl tracking-wide mb-6">
+                      Pilih Server Streaming
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                       {[
+                        { id: 'auto', label: 'Auto (Pilih Terbaik)', desc: 'Mencoba semua server' },
+                        { id: 'mapple', label: 'Mapple (VIP 🍎)', desc: 'Server kencang' },
+                        { id: 'vidcore', label: 'Vidcore (VIP 🔥)', desc: 'Server andalan' },
+                        { id: 'strigil', label: 'Strigil (VIP 💎)', desc: 'Multi-source HD' },
+                        { id: 'idlix', label: 'IDLIX', desc: 'Barat & Indo' },
+                        { id: 'lk21', label: 'LK21 🇮🇩', desc: 'Asia & Indo' },
+                        { id: 'moviebox', label: 'Moviebox ⚡', desc: 'Rilis Cepat' },
+                        { id: 'videasy', label: 'Videasy 🚀', desc: 'Cepat & Andal' }
+                      ].map(srv => (
+                        <button
+                          key={srv.id}
+                          onClick={() => {
+                            const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidcore' | 'mapple';
+                            setSelectedServer(srvId);
+                            setHasSelectedServer(true);
+                            setIsDetailLoading(true);
+                            fetchDetailForServer(srvId, selectedSeason, selectedEpisode);
+                          }}
+                          className="flex flex-col items-start p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-left group"
+                        >
+                          <span className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{srv.label}</span>
+                          <span className="text-xs text-zinc-400 mt-1">{srv.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
             ) : isDetailLoading ? (
               <>
                 <img 
@@ -720,7 +724,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                       Menyiapkan Pemutar Film...
                     </span>
                     <span className="text-xs sm:text-sm text-zinc-400">
-                      Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : selectedServer === 'vidbolt' ? 'Vidbolt' : selectedServer === 'iembed' ? 'iEmbed' : selectedServer === 'vidcore' ? 'Vidcore' : selectedServer === 'mapple' ? 'Mapple' : 'IDLIX, Strigil, Moviebox, Videasy, LK21, Vidbolt, iEmbed, Vidcore & Mapple'}...
+                      Menghubungkan ke server {selectedServer === 'moviebox' ? 'Moviebox' : selectedServer === 'idlix' ? 'IDLIX' : selectedServer === 'strigil' ? 'Strigil' : selectedServer === 'videasy' ? 'Videasy' : selectedServer === 'lk21' ? 'LK21' : selectedServer === 'vidcore' ? 'Vidcore' : selectedServer === 'mapple' ? 'Mapple' : 'IDLIX, Strigil, Moviebox, Videasy, LK21, Vidcore & Mapple'}...
                     </span>
                     <span className="text-[11px] sm:text-xs text-zinc-500 mt-2 text-center max-w-[250px] sm:max-w-xs">
                       Jika film tidak berjalan atau terganggu (buffering), Anda bisa memilih server lain di bawah pemutar ini.
@@ -749,54 +753,14 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   </p>
 
                   <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
-                    <span className="text-xs text-zinc-400 w-full sm:w-auto">Coba ganti server:</span>
                     <button
-                      onClick={() => { setSelectedServer('videasy'); fetchDetailForServer('videasy'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
+                      onClick={() => {
+                        setHasSelectedServer(false);
+                        setIsDetailLoading(false);
+                      }}
+                      className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-semibold border border-white/10 transition-all shadow-md"
                     >
-                      Coba Server Videasy
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('mapple'); fetchDetailForServer('mapple'); }}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold border border-red-500/30 transition-all shadow-md shadow-red-600/10"
-                    >
-                      Coba Server Mapple 🍎
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('vidcore'); fetchDetailForServer('vidcore'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
-                    >
-                      Coba Server Vidcore
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('iembed'); fetchDetailForServer('iembed'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
-                    >
-                      Coba Server iEmbed
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('strigil'); fetchDetailForServer('strigil'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
-                    >
-                      Coba Server Strigil VIP
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('moviebox'); fetchDetailForServer('moviebox'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
-                    >
-                      Coba Server Moviebox
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('idlix'); fetchDetailForServer('idlix'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
-                    >
-                      Coba Server IDLIX
-                    </button>
-                    <button
-                      onClick={() => { setSelectedServer('lk21'); fetchDetailForServer('lk21'); }}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all"
-                    >
-                      Coba Server LK21
+                      Pilih Server Lain
                     </button>
                   </div>
 
@@ -870,49 +834,18 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
               <span className="text-xs font-semibold text-zinc-300">
-                Pilih Server Streaming:
+                Server Saat Ini: <span className="text-white ml-1 px-2 py-0.5 rounded bg-white/10">{selectedServer.toUpperCase()}</span>
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { id: 'auto', label: 'Auto' },
-                { id: 'mapple', label: 'Mapple (VIP)' },
-                { id: 'vidcore', label: 'Vidcore (VIP)' },
-                { id: 'iembed', label: 'iEmbed (VIP)' },
-                { id: 'vidbolt', label: 'Vidbolt (VIP)' },
-                { id: 'strigil', label: 'Strigil (VIP)' },
-                { id: 'lk21', label: 'LK21' },
-                { id: 'idlix', label: 'IDLIX' },
-                { id: 'moviebox', label: 'Moviebox' },
-                { id: 'videasy', label: 'Videasy' },
-                { id: 'lk21', label: 'LK21' }
-              ].map(srv => {
-                const isActive = selectedServer === srv.id;
-                return (
-                  <button
-                    key={srv.id}
-                    onClick={() => {
-                      const srvId = srv.id as 'auto' | 'idlix' | 'moviebox' | 'strigil' | 'videasy' | 'lk21' | 'vidbolt' | 'iembed' | 'vidcore' | 'mapple';
-                      setSelectedServer(srvId);
-                      fetchDetailForServer(srvId);
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 ${
-                      isActive
-                        ? 'bg-[var(--color-primary-red)] text-white shadow-red-500/20'
-                        : 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5'
-                    }`}
-                  >
-                    {srv.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="px-6 py-2 bg-white/[0.02] border-b border-white/5 flex items-center justify-center text-center">
-            <span className="text-[11px] sm:text-xs text-zinc-400">
-              💡 <strong className="text-zinc-300 font-medium">Tips:</strong> Jika film tidak berjalan atau terganggu (buffering), silakan pilih server lain.
-            </span>
+            <button
+              onClick={() => {
+                setHasSelectedServer(false);
+                setIsVideoLoading(false);
+              }}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg text-xs font-bold transition-all duration-200"
+            >
+              Ganti Server 🔄
+            </button>
           </div>
           
           {/* Multi-Source VIP Embed Switcher */}
