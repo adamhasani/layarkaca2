@@ -66,9 +66,9 @@ export const removeFromWatchlist = async (userId: string, movieId: string) => {
 
 export const checkInWatchlist = async (userId: string, movieId: string) => {
   try {
-    const docRef = doc(db, 'watchlists', `${userId}_${movieId}`);
-    const snap = await getDoc(docRef);
-    return snap.exists();
+    const q = query(collection(db, 'watchlists'), where('userId', '==', userId), where('movieId', '==', movieId));
+    const snap = await getDocs(q);
+    return !snap.empty;
   } catch (err: any) {
     console.error("checkInWatchlist error:", err.message);
     return false;

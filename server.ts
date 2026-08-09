@@ -8,6 +8,7 @@ import path from "path";
 import { Buffer as Buffer2 } from "buffer";
 import { Readable } from "stream";
 import * as cheerio from "cheerio";
+import { createProxyMiddleware, responseInterceptor } from "http-proxy-middleware";
 import { fetchMoviesFromFirestore } from "./src/lib/firestoreMovies";
 import {
   fetchWikipediaFromFirestore,
