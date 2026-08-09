@@ -157,7 +157,7 @@ export default function App() {
             rating: result.rating || 8.0,
             year: result.year || (() => {
               const match = String(result.slug || '').match(/-(\d{4})$/);
-              return match ? parseInt(match[1]) : 0;
+              return match ? parseInt(match[1]) : new Date().getFullYear();
             })(),
             duration: result.duration || result.quality || 'HD',
             posterUrl: (result.poster && typeof result.poster === 'string' && !result.poster.includes('placeholder')) ? result.poster : '',
@@ -208,7 +208,7 @@ export default function App() {
               rating: result.rating || 9.5,
               year: result.year || (() => {
                 const match = String(result.slug || '').match(/-(\d{4})$/);
-                return match ? parseInt(match[1]) : 0;
+                return match ? parseInt(match[1]) : new Date().getFullYear();
               })(),
               duration: result.duration || result.quality || 'HD',
               posterUrl: (result.poster && typeof result.poster === 'string' && !result.poster.includes('placeholder')) ? result.poster : '',
@@ -387,13 +387,10 @@ export default function App() {
           posterUrl: item.moviePoster,
           bannerUrl: item.moviePoster,
           type: (item.movieType as any) || 'movie',
-          description: item.description || '',
-          categories: item.categories || [],
-          rating: item.rating || 0,
-          year: item.year || (() => {
-            const match = String(item.movieId || '').match(/-(\d{4})$/);
-            return match ? parseInt(match[1]) : 0;
-          })(),
+          description: '',
+          categories: [],
+          rating: 0,
+          year: new Date().getFullYear(),
           duration: '',
           subtitles: [],
           reviews: [],
@@ -407,13 +404,10 @@ export default function App() {
           posterUrl: item.moviePoster,
           bannerUrl: item.moviePoster,
           type: (item.movieType as any) || 'movie',
-          description: item.description || '',
-          categories: item.categories || [],
-          rating: item.rating || 0,
-          year: item.year || (() => {
-            const match = String(item.movieId || '').match(/-(\d{4})$/);
-            return match ? parseInt(match[1]) : 0;
-          })(),
+          description: '',
+          categories: [],
+          rating: 0,
+          year: new Date().getFullYear(),
           duration: '',
           subtitles: [],
           reviews: [],
@@ -460,7 +454,7 @@ export default function App() {
             rating: result.rating || 7.5,
             year: result.year || (() => {
               const match = String(result.slug || '').match(/-(\d{4})$/);
-              return match ? parseInt(match[1]) : 0;
+              return match ? parseInt(match[1]) : new Date().getFullYear();
             })(),
             duration: result.duration || result.quality || 'HD',
             posterUrl: (result.poster && typeof result.poster === 'string' && !result.poster.includes('placeholder')) ? result.poster : '',
@@ -495,49 +489,6 @@ export default function App() {
     });
     return Array.from(map.values()).sort((a, b) => (b.year || 0) - (a.year || 0));
   }, [wikiTrendingPopularMovies, latestMovies, trendingMovies, actionMovies, horrorMovies, comedyMovies, wikiComedyMovies, indoTrendingMovies, wikiBlockbusterMovies, wikiAnimatedMovies]);
-
-  // Enrich history and watchlist items with metadata from allHomeMovies if missing
-  useEffect(() => {
-    if (allHomeMovies.length > 0) {
-      setHistoryMovies(prev => {
-        let changed = false;
-        const next = prev.map(m => {
-          const match = allHomeMovies.find(am => am.id === m.id);
-          if (match && (!m.rating || !m.description)) {
-            changed = true;
-            return {
-              ...m,
-              description: m.description || match.description,
-              rating: m.rating || match.rating,
-              year: m.year || match.year,
-              categories: (m.categories && m.categories.length > 0) ? m.categories : match.categories
-            };
-          }
-          return m;
-        });
-        return changed ? next : prev;
-      });
-
-      setWatchlistMovies(prev => {
-        let changed = false;
-        const next = prev.map(m => {
-          const match = allHomeMovies.find(am => am.id === m.id);
-          if (match && (!m.rating || !m.description)) {
-            changed = true;
-            return {
-              ...m,
-              description: m.description || match.description,
-              rating: m.rating || match.rating,
-              year: m.year || match.year,
-              categories: (m.categories && m.categories.length > 0) ? m.categories : match.categories
-            };
-          }
-          return m;
-        });
-        return changed ? next : prev;
-      });
-    }
-  }, [allHomeMovies]);
 
   const handleSelectCategory = (id: string | null) => {
     setSelectedCategory(id);

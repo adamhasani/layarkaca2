@@ -8,10 +8,6 @@ export interface WatchlistItem {
   movieTitle: string;
   moviePoster: string;
   movieType: string;
-  description?: string;
-  rating?: number;
-  year?: number;
-  categories?: string[];
   addedAt: any;
 }
 
@@ -21,10 +17,6 @@ export interface HistoryItem {
   movieTitle: string;
   moviePoster: string;
   movieType: string;
-  description?: string;
-  rating?: number;
-  year?: number;
-  categories?: string[];
   progress: number;
   season?: number;
   episode?: number;
@@ -51,10 +43,6 @@ export const addToWatchlist = async (userId: string, movie: any) => {
     movieTitle: movie.title,
     moviePoster: movie.posterUrl || movie.bannerUrl || '',
     movieType: movie.type || 'movie',
-    description: movie.description || '',
-    rating: movie.rating || 0,
-    year: movie.year || 0,
-    categories: movie.categories || [],
     addedAt: serverTimestamp()
   });
 };
@@ -66,9 +54,9 @@ export const removeFromWatchlist = async (userId: string, movieId: string) => {
 
 export const checkInWatchlist = async (userId: string, movieId: string) => {
   try {
-    const q = query(collection(db, 'watchlists'), where('userId', '==', userId), where('movieId', '==', movieId));
-    const snap = await getDocs(q);
-    return !snap.empty;
+    const docRef = doc(db, 'watchlists', `${userId}_${movieId}`);
+    const snap = await getDoc(docRef);
+    return snap.exists();
   } catch (err: any) {
     console.error("checkInWatchlist error:", err.message);
     return false;
@@ -95,10 +83,6 @@ export const updateHistory = async (userId: string, movie: any, progress: number
     movieTitle: movie.title,
     moviePoster: movie.posterUrl || movie.bannerUrl || '',
     movieType: movie.type || 'movie',
-    description: movie.description || '',
-    rating: movie.rating || 0,
-    year: movie.year || 0,
-    categories: movie.categories || [],
     progress,
     season: season || null,
     episode: episode || null,

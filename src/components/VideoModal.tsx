@@ -1,4 +1,4 @@
-import { X, Settings, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard, Share2, Heart, Play } from 'lucide-react';
+import { X, Settings, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -359,7 +359,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-start justify-center p-2 sm:p-4 md:p-8 bg-black/95 backdrop-blur-xl overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-8 bg-black/95 backdrop-blur-xl overflow-y-auto"
       >
         <div className="absolute inset-0" onClick={onClose} />
         
@@ -368,7 +368,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-5xl bg-[#0a0a0a] rounded-2xl sm:rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl flex flex-col my-4 sm:my-8 z-10"
+          className="relative w-full max-w-5xl bg-[#0a0a0a] rounded-2xl sm:rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl flex flex-col my-auto z-10"
         >
           {/* Header Controls */}
           <div className="relative w-full p-3 sm:px-5 sm:py-4 flex justify-between items-center z-30 bg-[#0a0a0a] border-b border-white/10 shrink-0">
@@ -592,7 +592,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
           </AnimatePresence>
 
           {/* Video Area */}
-          <div className={`w-full relative bg-black group flex items-center justify-center overflow-hidden ${(!hasSelectedServer && !detailedMovie.streamUrl && !detailedMovie.embedUrl) || !hasSelectedServer ? 'aspect-square sm:min-h-0 sm:aspect-video' : 'aspect-video'}`}>
+          <div className="w-full aspect-video relative bg-black group flex items-center justify-center overflow-hidden">
             {detailedMovie.streamUrl ? (
               <>
                 <video 
@@ -673,7 +673,7 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                     <span className="text-white font-display font-bold text-xl sm:text-2xl tracking-wide mb-6">
                       Pilih Server Streaming
                     </span>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                        {[
                         { id: 'auto', label: 'Auto (Pilih Terbaik)', desc: 'Mencoba semua server' },
                         { id: 'mapple', label: 'Mapple (VIP 🍎)', desc: 'Server kencang' },
@@ -693,10 +693,10 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                             setIsDetailLoading(true);
                             fetchDetailForServer(srvId, selectedSeason, selectedEpisode);
                           }}
-                          className="flex flex-col items-start p-2.5 sm:p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-left group overflow-hidden"
+                          className="flex flex-col items-start p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-left group"
                         >
-                          <span className="text-[11px] sm:text-sm font-bold text-zinc-200 group-hover:text-white transition-colors w-full truncate">{srv.label}</span>
-                          <span className="text-[9px] sm:text-xs text-zinc-400 mt-0.5 w-full truncate">{srv.desc}</span>
+                          <span className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{srv.label}</span>
+                          <span className="text-xs text-zinc-400 mt-1">{srv.desc}</span>
                         </button>
                       ))}
                     </div>
@@ -841,7 +841,6 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
               onClick={() => {
                 setHasSelectedServer(false);
                 setIsVideoLoading(false);
-                setDetailedMovie(prev => prev ? { ...prev, streamUrl: undefined, embedUrl: undefined } : null);
               }}
               className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg text-xs font-bold transition-all duration-200"
             >
@@ -900,194 +899,142 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
           )}
 
           {/* Movie Details, Synopsis & Reviews Section */}
-          <div className="relative w-full border-t border-white/10 overflow-hidden bg-[#050505]">
-            {/* Background Texture/Image for the info section */}
-            <div className="absolute inset-0 z-0">
-              <img 
-                src={detailedMovie.bannerUrl || detailedMovie.posterUrl} 
-                alt="Background" 
-                className="w-full h-full object-cover opacity-15 saturate-50"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent" />
-            </div>
+          <div className="p-6 md:p-8 bg-zinc-950/90 border-t border-white/10 space-y-6">
+            {/* Header: Title, Rating, Badges */}
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+                <div className="space-y-1">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold text-white tracking-wide">
+                    {detailedMovie.title}
+                  </h3>
+                  {detailedMovie.tagline && (
+                    <p className="text-zinc-400 italic text-sm md:text-base font-light">
+                      "{detailedMovie.tagline}"
+                    </p>
+                  )}
+                </div>
+                {detailedMovie.rating ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold">
+                    <Star className="w-4 h-4 fill-current" />
+                    <span>{detailedMovie.rating} / 10</span>
+                  </div>
+                ) : null}
+              </div>
 
-            <div className="relative z-10 p-6 md:p-10 space-y-8">
-              {/* Hero Banner Style Info */}
-              <div className="space-y-6 max-w-4xl">
-                <h1 className="text-4xl md:text-6xl font-display font-black text-white tracking-tight drop-shadow-xl uppercase">
-                  {detailedMovie.title}
-                </h1>
-
-                {/* Genres */}
+              {/* Metadata Badges */}
+              <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-zinc-400">
+                {detailedMovie.year ? (
+                  <span className="px-2.5 py-0.5 rounded bg-white/10 text-white font-medium">
+                    {detailedMovie.year}
+                  </span>
+                ) : null}
+                {detailedMovie.type ? (
+                  <span className="px-2.5 py-0.5 rounded bg-red-600/20 border border-red-500/30 text-red-400 font-medium capitalize">
+                    {detailedMovie.type}
+                  </span>
+                ) : null}
+                {detailedMovie.duration ? (
+                  <span className="flex items-center gap-1 text-zinc-300">
+                    <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                    {detailedMovie.duration}
+                  </span>
+                ) : null}
                 {detailedMovie.categories && detailedMovie.categories.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 text-sm md:text-base text-zinc-300 font-medium">
+                  <div className="flex flex-wrap items-center gap-1.5 ml-auto">
                     {detailedMovie.categories.map((cat, idx) => (
-                      <React.Fragment key={idx}>
-                        <span>{cat}</span>
-                        {idx < detailedMovie.categories!.length - 1 && <span className="text-zinc-600">·</span>}
-                      </React.Fragment>
+                      <span key={idx} className="px-2.5 py-0.5 rounded-full bg-zinc-800/80 text-zinc-300 text-xs border border-zinc-700/50">
+                        {cat}
+                      </span>
                     ))}
                   </div>
                 )}
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={handleToggleWatchlist}
-                    disabled={isWatchlistLoading}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-semibold transition-colors backdrop-blur-md"
-                  >
-                    {isWatchlistLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : inWatchlist ? (
-                      <Bookmark className="w-4 h-4 fill-current text-white" />
-                    ) : (
-                      <Bookmark className="w-4 h-4" />
-                    )}
-                    {inWatchlist ? 'Watchlist' : 'Watchlist'}
-                  </button>
-                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-sm font-semibold transition-colors backdrop-blur-md">
-                    <Heart className="w-4 h-4" />
-                    Favourite
-                  </button>
-                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-sm font-semibold transition-colors backdrop-blur-md">
-                    <Share2 className="w-4 h-4" />
-                    Share
-                  </button>
-                </div>
-
-                {/* Metadata Row */}
-                <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-400 font-medium">
-                  {detailedMovie.year && <span>{detailedMovie.year}</span>}
-                  {detailedMovie.year && <span className="text-zinc-600">·</span>}
-                  {isTvSeries && (
-                    <>
-                      <span>{seasonsToRender.length} Seasons</span>
-                      <span className="text-zinc-600">·</span>
-                    </>
-                  )}
-                  {detailedMovie.rating ? (
-                    <>
-                      <span className="flex items-center gap-1 text-amber-400">
-                        <Star className="w-3.5 h-3.5 fill-current" /> {detailedMovie.rating}
-                      </span>
-                      <span className="text-zinc-600">·</span>
-                    </>
-                  ) : null}
-                  {detailedMovie.type && (
-                    <span className="uppercase">{detailedMovie.type.replace('_', ' ')}</span>
-                  )}
-                </div>
-
-                {/* Creator / Tagline */}
-                <div className="space-y-1">
-                  {(detailedMovie.director || detailedMovie.cast) && (
-                    <p className="text-sm text-zinc-400">
-                      Creator : <span className="text-zinc-200">{detailedMovie.director || (detailedMovie.cast ? detailedMovie.cast[0] : 'Unknown')}</span>
-                    </p>
-                  )}
-                  {detailedMovie.tagline && (
-                    <p className="text-sm text-zinc-500 italic mt-1">
-                      {detailedMovie.tagline}
-                    </p>
-                  )}
-                </div>
-
-                {/* Synopsis */}
-                <p className="text-sm md:text-base text-zinc-300 leading-relaxed max-w-3xl">
-                  {detailedMovie.description || "Belum ada sinopsis untuk film ini."}
-                </p>
               </div>
+              
+              {/* Watchlist Action */}
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                <button
+                  onClick={handleToggleWatchlist}
+                  disabled={isWatchlistLoading}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    inWatchlist 
+                      ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' 
+                      : 'bg-[var(--color-primary-red)] hover:bg-red-700 text-white'
+                  } disabled:opacity-50`}
+                >
+                  {isWatchlistLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : inWatchlist ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Bookmark className="w-4 h-4" />
+                  )}
+                  {inWatchlist ? 'Hapus dari Watchlist' : 'Tambah ke Watchlist'}
+                </button>
+              </div>
+            </div>
 
-              {/* Episodes Section */}
-              {isTvSeries && (
-                <div className="pt-8 border-t border-white/10">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <h3 className="text-2xl font-bold text-white">Episodes</h3>
-                    
-                    {/* Season Selector */}
-                    {seasonsToRender.length > 1 && (
-                      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                        {seasonsToRender.map(s => (
-                          <button
-                            key={s.season_number}
-                            onClick={() => handleSeasonChange(s.season_number)}
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                              selectedSeason === s.season_number
-                                ? 'bg-zinc-800 text-white'
-                                : 'bg-transparent text-zinc-400 hover:text-white hover:bg-white/5'
-                            }`}
-                          >
-                            {s.name || `Season ${s.season_number}`}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+            {/* TV Series Seasons & Episodes Selection */}
+            {isTvSeries && (
+              <div className="space-y-4 p-5 rounded-2xl bg-zinc-950/50 border border-white/5 shadow-xl">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center text-[var(--color-primary-red)] shrink-0 animate-pulse">
+                      <Clapperboard className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold text-sm sm:text-base">Daftar Season & Episode</h4>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">Sedang diputar: <span className="text-white font-bold">Season {selectedSeason} - Episode {selectedEpisode}</span></p>
+                    </div>
                   </div>
+                </div>
 
-                  {/* Episodes Grid with Thumbnails */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {/* Season Tabs Selector (only visible if we have multiple seasons resolved) */}
+                {seasonsToRender.length > 1 && (
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Pilih Season</span>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                      {seasonsToRender.map(s => (
+                        <button
+                          key={s.season_number}
+                          onClick={() => handleSeasonChange(s.season_number)}
+                          className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                            selectedSeason === s.season_number
+                              ? 'bg-[var(--color-primary-red)] text-white border-red-500 shadow-md shadow-red-500/20'
+                              : 'bg-white/5 border-white/5 hover:bg-white/10 text-zinc-300 hover:text-white'
+                          }`}
+                        >
+                          {s.name || `Season ${s.season_number}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Episodes Grid Selector */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Pilih Episode</span>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
                     {Array.from({ length: episodeCount }, (_, i) => i + 1).map(epNum => {
                       const isPlayingEp = selectedEpisode === epNum;
                       return (
                         <button
                           key={epNum}
                           onClick={() => handleEpisodeChange(epNum)}
-                          className="group flex flex-col text-left transition-all w-full relative"
+                          className={`py-3 rounded-xl text-xs font-bold transition-all border flex flex-col items-center justify-center gap-1 ${
+                            isPlayingEp
+                              ? 'bg-red-500/15 border-red-500 text-white shadow-[0_0_15px_rgba(217,4,41,0.25)]'
+                              : 'bg-white/5 border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white'
+                          }`}
                         >
-                          {/* Thumbnail Container */}
-                          <div className={`relative w-full aspect-video rounded-xl overflow-hidden mb-3 border-2 transition-all ${
-                            isPlayingEp ? 'border-[var(--color-primary-red)] shadow-[0_0_20px_rgba(217,4,41,0.3)]' : 'border-transparent group-hover:border-white/20'
-                          }`}>
-                            <img 
-                              src={detailedMovie.bannerUrl || detailedMovie.posterUrl} 
-                              alt={`Episode ${epNum}`}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
-                            
-                            {/* Top Badges */}
-                            <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-black/80 backdrop-blur-sm text-[10px] font-bold text-white border border-white/10">
-                              S{selectedSeason.toString().padStart(2, '0')}E{epNum.toString().padStart(2, '0')}
-                            </div>
-                            <div className="absolute top-2 right-2 px-2 py-1 rounded-md bg-black/80 backdrop-blur-sm text-[10px] font-bold text-zinc-300 border border-white/10">
-                              Episode {epNum}
-                            </div>
-
-                            {/* Bottom Badges */}
-                            <div className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/80 backdrop-blur-sm text-[10px] font-bold text-amber-400">
-                              <Star className="w-3 h-3 fill-current" /> {detailedMovie.rating || '8.0'}
-                            </div>
-                            <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/80 backdrop-blur-sm text-[10px] font-bold text-zinc-300">
-                              45m
-                            </div>
-
-                            {/* Play Indicator if active */}
-                            {isPlayingEp && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
-                                <div className="w-10 h-10 rounded-full bg-[var(--color-primary-red)] flex items-center justify-center text-white shadow-lg animate-pulse">
-                                  <Play className="w-4 h-4 ml-1" />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Info */}
-                          <div className="space-y-1 pr-2">
-                            <h4 className={`text-sm font-bold truncate transition-colors ${isPlayingEp ? 'text-[var(--color-primary-red)]' : 'text-zinc-200 group-hover:text-white'}`}>
-                              Episode {epNum}
-                            </h4>
-                            <p className="text-xs text-zinc-500 line-clamp-2">
-                              Saksikan kelanjutan kisah di episode {epNum} musim ini. Menampilkan aksi dan ketegangan yang mendebarkan.
-                            </p>
-                          </div>
+                          <span className="text-[9px] uppercase text-zinc-500 font-bold">EPS</span>
+                          <span className="text-sm font-black">{epNum}</span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Synopsis Section */}
             <div className="space-y-2 pt-4 border-t border-white/5">
@@ -1174,9 +1121,8 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
               })()}
 </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
-  </AnimatePresence>
+    </AnimatePresence>
   );
 }

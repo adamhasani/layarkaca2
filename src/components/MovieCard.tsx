@@ -143,7 +143,7 @@ export function MovieCard({ movie, onPlay, index }: MovieCardProps) {
                   {movie.title}
                 </h3>
                 <span className="text-[11px] text-zinc-400 font-bold bg-zinc-900/60 px-2 py-0.5 rounded border border-zinc-800/40">
-                  {movie.year || ""}
+                  {movie.year || new Date().getFullYear()}
                 </span>
               </div>
 
@@ -198,7 +198,7 @@ export function MovieCard({ movie, onPlay, index }: MovieCardProps) {
             })()}
 
             <span className="text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 sm:px-2 bg-[var(--color-primary-yellow)] text-black rounded shadow-md whitespace-nowrap">
-              ★ {movie.rating || '-'}
+              ★ {movie.rating || '8.0'}
             </span>
             {(() => {
               const isTvSeries = movie.type === 'series' || movie.type === 'tv_series' || movie.id?.includes('series') || movie.id?.includes('-s1') || movie.id?.includes('-season');
@@ -249,7 +249,7 @@ export function MovieCard({ movie, onPlay, index }: MovieCardProps) {
               </h3>
               <div className="flex flex-col mt-2 gap-1.5">
                 <div className="flex items-center justify-between text-zinc-300 text-xs">
-                  <span className="font-medium">{movie.year || ""}</span>
+                  <span className="font-medium">{movie.year || new Date().getFullYear()}</span>
                   {audienceDisplay && (
                     <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1">
                       <span>🎟️</span>
@@ -283,7 +283,7 @@ export function MovieCard({ movie, onPlay, index }: MovieCardProps) {
         </h3>
         <div className="flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
           <div className="flex items-center justify-between">
-            <span>{movie.year || ""}</span>
+            <span>{movie.year || new Date().getFullYear()}</span>
             {audienceDisplay && (
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-1 py-0.5 rounded border border-emerald-500/20">
                 {audienceDisplay}
