@@ -157,6 +157,84 @@ function getPosterUrl(item) {
   return "";
 }
 __name(getPosterUrl, "getPosterUrl");
+
+async function fetchWikipediaSynopsisSingle(title) {
+  try {
+    const cleanTitle = title.replace(/\s+\(\d{4}\)$/, '').trim().replace(/ /g, '_');
+    const resId = await fetch(`https://id.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle)}`);
+    if (resId.ok) {
+      const data = await resId.json();
+      if (data && data.extract && !data.extract.includes("may refer to") && !data.extract.includes("merujuk pada")) {
+        return data.extract;
+      }
+    }
+  } catch (e) {}
+  
+  try {
+    const cleanTitle = title.replace(/\s+\(\d{4}\)$/, '').trim().replace(/ /g, '_');
+    const resEn = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle)}`);
+    if (resEn.ok) {
+      const data = await resEn.json();
+      if (data && data.extract && !data.extract.includes("may refer to") && !data.extract.includes("merujuk pada")) {
+        return data.extract;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+__name(fetchWikipediaSynopsisSingle, "fetchWikipediaSynopsisSingle");
+
+async function fetchWikipediaSynopsis(title) {
+  let synopsis = await fetchWikipediaSynopsisSingle(title);
+  if (synopsis) return synopsis;
+  
+  try {
+    const searchId = await fetch(`https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title + " film")}&utf8=&format=json`);
+    const searchDataId = await searchId.json();
+    if (searchDataId.query && searchDataId.query.search && searchDataId.query.search.length > 0) {
+      const firstTitle = searchDataId.query.search[0].title;
+      synopsis = await fetchWikipediaSynopsisSingle(firstTitle);
+      if (synopsis) return synopsis;
+    }
+  } catch (e) {}
+
+  try {
+    const searchEn = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title + " film")}&utf8=&format=json`);
+    const searchDataEn = await searchEn.json();
+    if (searchDataEn.query && searchDataEn.query.search && searchDataEn.query.search.length > 0) {
+      const firstTitle = searchDataEn.query.search[0].title;
+      synopsis = await fetchWikipediaSynopsisSingle(firstTitle);
+      if (synopsis) return synopsis;
+    }
+  } catch (e) {}
+  
+  return null;
+}
+__name(fetchWikipediaSynopsis, "fetchWikipediaSynopsis");
+
+async function enhanceWithWikipedia(resultData) {
+  if (resultData && resultData.status && resultData.result) {
+    if (!resultData.result.detail) resultData.result.detail = {};
+    const currentSynopsis = resultData.result.detail.synopsis || "";
+    if (
+      !currentSynopsis || 
+      currentSynopsis.includes("Saksikan") || 
+      currentSynopsis.includes("Film blockbuster") || 
+      currentSynopsis.includes("Film paling populer") || 
+      currentSynopsis.includes("Film animasi terlaris") || 
+      currentSynopsis.includes("secara langsung") || 
+      currentSynopsis.length < 30
+    ) {
+      const wiki = await fetchWikipediaSynopsis(resultData.result.title);
+      if (wiki) {
+        resultData.result.detail.synopsis = wiki;
+      }
+    }
+  }
+  return resultData;
+}
+__name(enhanceWithWikipedia, "enhanceWithWikipedia");
+
 async function fetchMovieDetail(slug) {
   if (!slug) return null;
   if (detailCache.has(slug)) return detailCache.get(slug);
@@ -2265,7 +2343,7 @@ app.get("/api/detail", async (req, res) => {
         if (titleVal && /^\d+$/.test(titleVal)) {
           return titleVal;
         }
-        let finalYear = yearVal;
+        let finalYear = yearVal; if (finalYear == "2026" || finalYear == 2026) finalYear = undefined;
         if (slugVal) {
           const slugYearMatch = slugVal.match(/-(\d{4})$/);
           if (slugYearMatch) {
@@ -2723,43 +2801,49 @@ app.get("/api/detail", async (req, res) => {
       }
     }
 
-    if (isIndo) {
-      // Khusus film indo, langsung gunakan strigil MultiEmbed apa pun yang dipilih user (karena cuman strigil yg punya)
-      const result = await fetchStrigil();
-      if (result) {
-        const multiEmbedSrc = result.result?.embedSources?.find((s: any) => s.name.includes("MultiEmbed"));
-        if (multiEmbedSrc) {
-          result.result.embedUrl = multiEmbedSrc.url;
-        }
-        result.server = "Strigil MultiEmbed";
-        detailCache.set(cacheKey, result);
-        return res.json(result);
-      }
-      
-      // If it's an Indo film and Strigil fails, don't try other servers because Indo films are only on Strigil
-      return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
-    }
+    // if (isIndo) {
+    //   // Khusus film indo, langsung gunakan strigil MultiEmbed apa pun yang dipilih user (karena cuman strigil yg punya)
+    //   const result = await fetchStrigil();
+    //   if (result) {
+    //     const multiEmbedSrc = result.result?.embedSources?.find((s: any) => s.name.includes("MultiEmbed"));
+    //     if (multiEmbedSrc) {
+    //       result.result.embedUrl = multiEmbedSrc.url;
+    //     }
+    //     result.server = "Strigil MultiEmbed";
+    //     detailCache.set(cacheKey, result);
+    //     return res.json(result);
+    //   }
+    //   
+    //   // If it's an Indo film and Strigil fails, don't try other servers because Indo films are only on Strigil
+    //   return res.json({ status: false, message: `Film '${cleanQuery}' belum tersedia di server Strigil (Indo).` });
+    // }
 
     if (requestedServer === "mapple") {
-      const result = await fetchStrigil();
+      let result = await fetchStrigil();
       if (result) {
         result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Mapple"))?.url || result.result.embedUrl;
+        result.server = "Mapple";
+        result = await enhanceWithWikipedia(result);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
     }
+
     if (requestedServer === "vidcore") {
-      const result = await fetchStrigil();
+      let result = await fetchStrigil();
       if (result) {
         result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Vidcore"))?.url || result.result.embedUrl;
+        result.server = "Vidcore";
+        result = await enhanceWithWikipedia(result);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
     }
     if (requestedServer === "strigil") {
-      const strigilResult = await fetchStrigil();
+      let strigilResult = await fetchStrigil();
       if (strigilResult) {
         strigilResult.result.embedUrl = strigilResult.result.embedSources?.find(s => s.name.includes("Strigil"))?.url || strigilResult.result.embedUrl;
+        strigilResult = await enhanceWithWikipedia(strigilResult);
         detailCache.set(cacheKey, strigilResult);
         return res.json(strigilResult);
       }
@@ -2770,8 +2854,9 @@ app.get("/api/detail", async (req, res) => {
       return res.json(failStrigil);
     }
     if (requestedServer === "moviebox") {
-      const mbResult = await fetchMoviebox(cleanQuery, isTvSeries, season, episode);
+      let mbResult = await fetchMoviebox(cleanQuery, isTvSeries, season, episode);
       if (mbResult) {
+        mbResult = await enhanceWithWikipedia(mbResult);
         detailCache.set(cacheKey, mbResult);
         return res.json(mbResult);
       }
@@ -2782,8 +2867,9 @@ app.get("/api/detail", async (req, res) => {
       return res.json(failMb);
     }
     if (requestedServer === "videasy") {
-      const videasyResult = await fetchVideasy();
+      let videasyResult = await fetchVideasy();
       if (videasyResult) {
+        videasyResult = await enhanceWithWikipedia(videasyResult);
         detailCache.set(cacheKey, videasyResult);
         return res.json(videasyResult);
       }
@@ -2794,8 +2880,9 @@ app.get("/api/detail", async (req, res) => {
       return res.json(failVideasy);
     }
     if (requestedServer === "lk21") {
-      const lk21Result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
+      let lk21Result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
       if (lk21Result) {
+        lk21Result = await enhanceWithWikipedia(lk21Result);
         detailCache.set(cacheKey, lk21Result);
         return res.json(lk21Result);
       }
@@ -2833,6 +2920,7 @@ app.get("/api/detail", async (req, res) => {
                 directData.result.detail.tagline = detailMeta.tagline || "";
                 directData.result.detail.releaseDate =
                   detailMeta.releaseDate || "";
+                directData.result.detail.synopsis = detailMeta.overview || detailMeta.synopsis || "";
               }
             } catch (e) {
               console.error("Error fetching detail meta:", e);
@@ -2903,6 +2991,8 @@ app.get("/api/detail", async (req, res) => {
                       detailMeta.tagline || "";
                     matchedData.result.detail.releaseDate =
                       detailMeta.releaseDate || "";
+                    matchedData.result.detail.synopsis =
+                      detailMeta.overview || detailMeta.synopsis || "";
                   }
                 } catch (e) {
                   console.error(
@@ -2927,8 +3017,9 @@ app.get("/api/detail", async (req, res) => {
     };
 
     if (requestedServer === "idlix") {
-      const idlixRes = await fetchIdlixWrapper();
+      let idlixRes = await fetchIdlixWrapper();
       if (idlixRes) {
+        idlixRes = await enhanceWithWikipedia(idlixRes);
         detailCache.set(cacheKey, idlixRes);
         return res.json(idlixRes);
       }
@@ -2972,6 +3063,7 @@ app.get("/api/detail", async (req, res) => {
       }
 
       if (result && result.status) {
+        result = await enhanceWithWikipedia(result);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
