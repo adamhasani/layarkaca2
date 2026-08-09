@@ -1,4 +1,4 @@
-import { X, Settings, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard, Share2 } from 'lucide-react';
+import { X, Settings, Heart, Play, Plus, Bookmark, Subtitles, Activity, Star, Loader2, AlertCircle, Clock, Film, MessageSquare, Check, Users, Clapperboard, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -668,12 +668,12 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                   className="w-full h-full object-cover opacity-30 blur-sm scale-105"
                 />
                 
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/60 backdrop-blur-md p-6 text-center z-50 overflow-y-auto">
-                  <div className="flex flex-col items-center gap-1 w-full max-w-2xl my-auto py-8">
-                    <span className="text-white font-display font-bold text-xl sm:text-2xl tracking-wide mb-6">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-4 bg-black/60 backdrop-blur-md p-3 sm:p-6 text-center z-50 overflow-y-auto custom-scrollbar">
+                  <div className="flex flex-col items-center gap-1 w-full max-w-2xl my-auto py-2 sm:py-8">
+                    <span className="text-white font-display font-bold text-lg sm:text-2xl tracking-wide mb-3 sm:mb-6">
                       Pilih Server Streaming
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 w-full">
                        {[
                         { id: 'auto', label: 'Auto (Pilih Terbaik)', desc: 'Mencoba semua server' },
                         { id: 'mapple', label: 'Mapple (VIP 🍎)', desc: 'Server kencang' },
@@ -693,10 +693,10 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                             setIsDetailLoading(true);
                             fetchDetailForServer(srvId, selectedSeason, selectedEpisode);
                           }}
-                          className="flex flex-col items-start p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-left group"
+                          className="flex flex-col items-center justify-center p-2 sm:p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-center group"
                         >
-                          <span className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{srv.label}</span>
-                          <span className="text-xs text-zinc-400 mt-1">{srv.desc}</span>
+                          <span className="text-xs sm:text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{srv.label}</span>
+                          <span className="text-[9px] sm:text-[10px] text-zinc-400 mt-0.5">{srv.desc}</span>
                         </button>
                       ))}
                     </div>
@@ -911,10 +911,10 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent" />
             </div>
 
-            <div className="relative z-10 p-6 md:p-10 space-y-8">
+            <div className="relative z-10 p-4 sm:p-6 md:p-10 space-y-6 sm:space-y-8">
               {/* Hero Banner Style Info */}
-              <div className="space-y-6 max-w-4xl">
-                <h1 className="text-4xl md:text-6xl font-display font-black text-white tracking-tight drop-shadow-xl uppercase">
+              <div className="space-y-4 sm:space-y-6 max-w-4xl">
+                <h1 className="text-3xl sm:text-4xl md:text-6xl font-display font-black text-white tracking-tight drop-shadow-xl uppercase leading-tight">
                   {detailedMovie.title}
                 </h1>
 
@@ -931,28 +931,28 @@ export function VideoModal({ movie, onClose }: VideoModalProps) {
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
                   <button
                     onClick={handleToggleWatchlist}
                     disabled={isWatchlistLoading}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-semibold transition-colors backdrop-blur-md"
+                    className="flex justify-center items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs sm:text-sm font-semibold transition-colors backdrop-blur-md"
                   >
                     {isWatchlistLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                     ) : inWatchlist ? (
-                      <Bookmark className="w-4 h-4 fill-current text-white" />
+                      <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current text-white" />
                     ) : (
-                      <Bookmark className="w-4 h-4" />
+                      <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     )}
                     {inWatchlist ? 'Watchlist' : 'Watchlist'}
                   </button>
-                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-sm font-semibold transition-colors backdrop-blur-md">
-                    <Heart className="w-4 h-4" />
+                  <button className="flex justify-center items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-colors backdrop-blur-md">
+                    <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Favourite
                   </button>
-                  <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-sm font-semibold transition-colors backdrop-blur-md">
-                    <Share2 className="w-4 h-4" />
-                    Share
+                  <button onClick={handleShare} className="col-span-2 sm:col-span-1 flex justify-center items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white text-xs sm:text-sm font-semibold transition-colors backdrop-blur-md">
+                    <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    {isCopied ? 'Tersalin!' : 'Share'}
                   </button>
                 </div>
 

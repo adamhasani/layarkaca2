@@ -2227,6 +2227,42 @@ app.get("/api/stream-proxy", async (req, res) => {
     if (!res.headersSent) res.status(500).send("Stream proxy error");
   }
 });
+
+async function fetchWikiSynopsisFallback(title) {
+  if (!title) return null;
+  const cleanTitle = title.replace(/\(\d{4}\)/g, "").replace(/-/g, " ").trim();
+  try {
+    const urlId = `https://id.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle.replace(/ /g, '_'))}`;
+    const resId = await fetch(urlId, { headers: { "User-Agent": "CinestreamApp/1.0" } });
+    if (resId.ok) {
+      const data = await resId.json();
+      if (data.extract) return data.extract;
+    }
+    const urlEn = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle.replace(/ /g, '_'))}`;
+    const resEn = await fetch(urlEn, { headers: { "User-Agent": "CinestreamApp/1.0" } });
+    if (resEn.ok) {
+      const data = await resEn.json();
+      if (data.extract) return data.extract;
+    }
+  } catch (e) {
+    console.error("Wikipedia synopsis fallback error:", e);
+  }
+  return null;
+}
+
+async function enrichResultWithWiki(data, fallbackTitle) {
+  if (!data || !data.status || !data.result) return data;
+  const detail = data.result.detail;
+  if (detail && detail.synopsis !== undefined) {
+    if (!detail.synopsis || detail.synopsis.startsWith("Saksikan") || detail.synopsis.length < 15) {
+      const title = data.result.title || fallbackTitle;
+      const wiki = await fetchWikiSynopsisFallback(title);
+      if (wiki) detail.synopsis = wiki;
+    }
+  }
+  return data;
+}
+
 app.get("/api/detail", async (req, res) => {
   try {
     const {
@@ -2732,6 +2768,7 @@ app.get("/api/detail", async (req, res) => {
           result.result.embedUrl = multiEmbedSrc.url;
         }
         result.server = "Strigil MultiEmbed";
+        await enrichResultWithWiki(result, cleanQuery);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
@@ -2744,6 +2781,7 @@ app.get("/api/detail", async (req, res) => {
       const result = await fetchStrigil();
       if (result) {
         result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Mapple"))?.url || result.result.embedUrl;
+        await enrichResultWithWiki(result, cleanQuery);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
@@ -2752,6 +2790,7 @@ app.get("/api/detail", async (req, res) => {
       const result = await fetchStrigil();
       if (result) {
         result.result.embedUrl = result.result.embedSources?.find(s => s.name.includes("Vidcore"))?.url || result.result.embedUrl;
+        await enrichResultWithWiki(result, cleanQuery);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
@@ -2760,6 +2799,7 @@ app.get("/api/detail", async (req, res) => {
       const strigilResult = await fetchStrigil();
       if (strigilResult) {
         strigilResult.result.embedUrl = strigilResult.result.embedSources?.find(s => s.name.includes("Strigil"))?.url || strigilResult.result.embedUrl;
+        await enrichResultWithWiki(strigilResult, cleanQuery);
         detailCache.set(cacheKey, strigilResult);
         return res.json(strigilResult);
       }
@@ -2772,6 +2812,7 @@ app.get("/api/detail", async (req, res) => {
     if (requestedServer === "moviebox") {
       const mbResult = await fetchMoviebox(cleanQuery, isTvSeries, season, episode);
       if (mbResult) {
+        await enrichResultWithWiki(mbResult, cleanQuery);
         detailCache.set(cacheKey, mbResult);
         return res.json(mbResult);
       }
@@ -2784,6 +2825,7 @@ app.get("/api/detail", async (req, res) => {
     if (requestedServer === "videasy") {
       const videasyResult = await fetchVideasy();
       if (videasyResult) {
+        await enrichResultWithWiki(videasyResult, cleanQuery);
         detailCache.set(cacheKey, videasyResult);
         return res.json(videasyResult);
       }
@@ -2796,6 +2838,7 @@ app.get("/api/detail", async (req, res) => {
     if (requestedServer === "lk21") {
       const lk21Result = await fetchLk21(cleanQuery, year ? parseInt(year as string) : undefined);
       if (lk21Result) {
+        await enrichResultWithWiki(lk21Result, cleanQuery);
         detailCache.set(cacheKey, lk21Result);
         return res.json(lk21Result);
       }
@@ -2929,6 +2972,7 @@ app.get("/api/detail", async (req, res) => {
     if (requestedServer === "idlix") {
       const idlixRes = await fetchIdlixWrapper();
       if (idlixRes) {
+        await enrichResultWithWiki(idlixRes, cleanQuery);
         detailCache.set(cacheKey, idlixRes);
         return res.json(idlixRes);
       }
@@ -2972,6 +3016,7 @@ app.get("/api/detail", async (req, res) => {
       }
 
       if (result && result.status) {
+        await enrichResultWithWiki(result, cleanQuery);
         detailCache.set(cacheKey, result);
         return res.json(result);
       }
