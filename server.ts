@@ -2511,11 +2511,11 @@ app.get("/api/detail", async (req, res) => {
           let vidcoreUrl = "";
           let strigilUrl = "";
           if (isTvSeries) {
-            mappleUrl = `https://mapple.uk/embed/tv/${tmdbId}/${sNum}/${eNum}`;
+            mappleUrl = `https://mapple.uk/watch/tv/${tmdbId}/${sNum}/${eNum}?autoPlay=true`;
             vidcoreUrl = `https://www.vidcore.org/embed/tv/${tmdbId}/${sNum}/${eNum}`;
             strigilUrl = `https://strigil.cc/embed/tv/${tmdbId}/${sNum}/${eNum}`;
           } else {
-            mappleUrl = `https://mapple.uk/embed/movie/${tmdbId}`;
+            mappleUrl = `https://mapple.uk/watch/movie/${tmdbId}?autoPlay=true`;
             vidcoreUrl = `https://www.vidcore.org/embed/movie/${tmdbId}`;
             strigilUrl = `https://strigil.cc/embed/movie/${tmdbId}`;
           }
