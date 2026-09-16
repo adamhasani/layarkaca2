@@ -1,20 +1,19 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# LayarZona
 
-# Run and deploy your AI Studio app
+Portal streaming film & serial — agregasi metadata TMDB, pencarian, dan pemutaran
+dengan multiple source/fallback.
 
-This contains everything you need to run your app locally.
+## Tech
+- Frontend: HTML + aset statis
+- API layer: `api/` (serverless-style endpoints)
+- Data: TMDB (`fetch-tmdb*.mjs`)
+- Util: `check*.js` (health check endpoint), `clear-cache*.ts`
 
-View your app in AI Studio: https://ai.studio/apps/a16cffb1-52ac-4dd4-a6e6-5d0ec7e05c34
+## Cara jalan
+```bash
+bun install
+bun dev   # atau pakai static host untuk frontend
+```
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+> Repo ini salah satu dari seri eksperimen LayarZona (lihat juga `layarzona1`,
+> `layarzona3`, `layarzonaa`).
